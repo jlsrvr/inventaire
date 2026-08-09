@@ -1,6 +1,7 @@
-def main():
-    print("Hello from backend!")
+from fastapi import FastAPI
 
+app = FastAPI()
 
-if __name__ == "__main__":
-    main()
+@app.get("/health")
+async def get_health():
+    return {"status": "ok"}
