@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "defaultMode": "plan",
+
+    "deny": [
+      "Edit(server/app/**)",
+      "Write(server/app/**)",
+      "Edit(client/src/**)",
+      "Write(client/src/**)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ],
+
+    "allow": [
+      "Edit(server/tests/**)",
+      "Write(server/tests/**)",
+      "Edit(client/src/**/*.test.ts)",
+      "Write(client/src/**/*.test.ts)",
+      "Edit(client/src/**/*.test.tsx)",
+      "Write(client/src/**/*.test.tsx)",
+
+      "Bash(pytest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx vitest:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)"
+    ]
+  }
+}
