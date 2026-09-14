@@ -19,7 +19,7 @@ def init_db() -> None:
                 id         TEXT PRIMARY KEY,
                 name       TEXT    NOT NULL,
                 category   TEXT    NOT NULL DEFAULT 'other',
-                quantity   INTEGER NOT NULL,
+                quantity   REAL    NOT NULL,
                 unit       TEXT,
                 updated_at TEXT    NOT NULL,
                 updated_by TEXT    NOT NULL,

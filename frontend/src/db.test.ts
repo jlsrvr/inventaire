@@ -25,6 +25,12 @@ describe('saveItem', () => {
     expect(row?.quantity).toBe(0)
   })
 
+  it('accepts a decimal quantity', async () => {
+    const id = await saveItem({ name: 'Farine', quantity: 1.5, unit: 'kg' }, 'John')
+    const row = await db.items.get(id)
+    expect(row?.quantity).toBe(1.5)
+  })
+
   it('editing an existing item keeps its id and seq, bumps updated_at', async () => {
     const id = await saveItem({ name: 'Café', quantity: 3 }, 'John')
     await db.items.update(id, { seq: 5, dirty: 0 })

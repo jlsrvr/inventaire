@@ -39,6 +39,21 @@ def test_accepts_zero_quantity():
 
     assert item.quantity == 0
 
+
+def test_accepts_decimal_quantity():
+    # e.g. 1.5 kg of flour.
+    item = ItemChange(
+        id=uuid.uuid4(),
+        name="Farine",
+        unit="kg",
+        quantity=1.5,
+        updated_at="2026-08-09T12:00:00",
+        updated_by="John",
+    )
+
+    assert item.quantity == 1.5
+
+
 def test_unit_defaults_to_none():
     item = ItemChange(
         id=uuid.uuid4(),

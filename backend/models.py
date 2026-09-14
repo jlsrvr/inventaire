@@ -1,6 +1,6 @@
 import uuid
 import datetime
-from pydantic import BaseModel, NonNegativeInt
+from pydantic import BaseModel, NonNegativeFloat
 
 
 class ItemChange(BaseModel):
@@ -10,7 +10,9 @@ class ItemChange(BaseModel):
     name: str
     unit: str | None = None
     category: str = "other"
-    quantity: NonNegativeInt  # 0 is valid — a zeroed item is the shopping list
+    # 0 is valid — a zeroed item is the shopping list. Decimal quantities are
+    # allowed too, e.g. 1.5 kg of flour.
+    quantity: NonNegativeFloat
     updated_at: datetime.datetime
     updated_by: str
 

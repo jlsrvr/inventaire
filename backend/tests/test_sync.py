@@ -118,3 +118,12 @@ def test_zero_quantity_is_allowed(client, auth_headers):
     )
     assert resp.status_code == 200
     assert resp.json()["changes"][0]["quantity"] == 0
+
+
+def test_decimal_quantity_round_trips(client, auth_headers):
+    change = make_change(quantity=1.5, unit="kg")
+    resp = client.post(
+        "/sync", json={"since": 0, "changes": [change]}, headers=auth_headers
+    )
+    assert resp.status_code == 200
+    assert resp.json()["changes"][0]["quantity"] == 1.5
