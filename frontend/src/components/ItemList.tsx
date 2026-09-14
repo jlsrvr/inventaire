@@ -1,5 +1,6 @@
 import { strings, categoryLabels } from '../strings'
 import { chipClassesFor } from '../lib/categoryColors'
+import { formatUpdatedAt } from '../lib/formatDate'
 import type { LocalItem } from '../db'
 
 export function ItemList({
@@ -39,6 +40,10 @@ export function ItemList({
                   item.category}
               </span>
               {item.unit ? <span className="text-slate-400">{item.unit}</span> : null}
+            </span>
+            <span className="text-[0.7rem] text-slate-400">
+              {strings.updatedOn} {formatUpdatedAt(item.updated_at)} {strings.updatedBy}{' '}
+              {item.updated_by}
             </span>
           </button>
           <div className="flex items-center gap-2">

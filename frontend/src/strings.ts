@@ -20,6 +20,8 @@ export const strings = {
   showAll: 'Tout',
   showShoppingList: 'Liste de courses',
   shoppingListEmpty: 'Rien à racheter.',
+  updatedOn: 'Modifié le',
+  updatedBy: 'par',
   // Form
   formAddTitle: 'Nouvel article',
   formEditTitle: 'Modifier l’article',
