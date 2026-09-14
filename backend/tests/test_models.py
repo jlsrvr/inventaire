@@ -26,6 +26,19 @@ def test_rejects_negative_quantity():
             updated_by="John",
         )
 
+
+def test_accepts_zero_quantity():
+    # A zeroed item is the shopping list — it must be a valid quantity.
+    item = ItemChange(
+        id=uuid.uuid4(),
+        name="Café",
+        quantity=0,
+        updated_at="2026-08-09T12:00:00",
+        updated_by="John",
+    )
+
+    assert item.quantity == 0
+
 def test_unit_defaults_to_none():
     item = ItemChange(
         id=uuid.uuid4(),
