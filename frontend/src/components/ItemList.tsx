@@ -34,17 +34,12 @@ export function ItemList({
             onClick={() => onEdit(item)}
           >
             <span className="font-semibold">{item.name}</span>
-            {(showCategory || item.unit) && (
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                {showCategory && (
-                  <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-[0.72rem] font-semibold ${chipClassesFor(item.category)}`}
-                  >
-                    {categoryLabels[item.category as keyof typeof categoryLabels] ??
-                      item.category}
-                  </span>
-                )}
-                {item.unit ? <span className="text-slate-400">{item.unit}</span> : null}
+            {showCategory && (
+              <span
+                className={`inline-block w-fit rounded-full px-2 py-0.5 text-[0.72rem] font-semibold ${chipClassesFor(item.category)}`}
+              >
+                {categoryLabels[item.category as keyof typeof categoryLabels] ??
+                  item.category}
               </span>
             )}
             <span className="text-[0.7rem] text-slate-400">
@@ -52,27 +47,32 @@ export function ItemList({
               {item.updated_by}
             </span>
           </button>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="-1"
-              className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-              onClick={() => onAdjust(item.id, -1)}
-              disabled={item.quantity === 0}
-            >
-              −
-            </button>
-            <span className="min-w-6 text-center font-semibold tabular-nums">
-              {item.quantity}
-            </span>
-            <button
-              type="button"
-              aria-label="+1"
-              className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover"
-              onClick={() => onAdjust(item.id, 1)}
-            >
-              +
-            </button>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="-1"
+                className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() => onAdjust(item.id, -1)}
+                disabled={item.quantity === 0}
+              >
+                −
+              </button>
+              <span className="min-w-6 text-center font-semibold tabular-nums">
+                {item.quantity}
+              </span>
+              <button
+                type="button"
+                aria-label="+1"
+                className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover"
+                onClick={() => onAdjust(item.id, 1)}
+              >
+                +
+              </button>
+            </div>
+            {item.unit && (
+              <span className="text-xs font-semibold capitalize">{item.unit}</span>
+            )}
           </div>
         </li>
       ))}
