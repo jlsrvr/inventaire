@@ -1,12 +1,14 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.svg'],
@@ -40,5 +42,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
+  },
+  server: {
+    // Leading-dot entries match any subdomain, so this survives ngrok handing
+    // out a new random subdomain on each free-tier tunnel restart.
+    allowedHosts: ['.ngrok-free.dev'],
   },
 })

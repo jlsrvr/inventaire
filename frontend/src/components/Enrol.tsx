@@ -28,31 +28,40 @@ export function Enrol({ onEnrolled }: { onEnrolled: () => void }) {
     }
   }
 
+  const fieldClasses =
+    'rounded-md border border-[#e7cba9] bg-white p-2 text-slate-900 focus:outline focus:outline-2 focus:outline-accent focus:outline-offset-1'
+
   return (
-    <div className="enrol">
-      <h1>{strings.enrolTitle}</h1>
+    <div className="mx-auto mt-12 max-w-[360px] p-4">
+      <h1 className="text-accent-hover">{strings.enrolTitle}</h1>
       <p>{strings.enrolIntro}</p>
-      <form onSubmit={handleSubmit}>
-        <label>
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+        <label className="flex flex-col gap-1">
           {strings.firstName}
           <input
+            className={fieldClasses}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
             autoFocus
           />
         </label>
-        <label>
+        <label className="flex flex-col gap-1">
           {strings.passphrase}
           <input
+            className={fieldClasses}
             type="password"
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
             required
           />
         </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={submitting || !firstName || !passphrase}>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <button
+          type="submit"
+          className="rounded-md border border-accent bg-accent px-3 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:border-[#e2b78e] disabled:bg-[#e2b78e]"
+          disabled={submitting || !firstName || !passphrase}
+        >
           {strings.enrolSubmit}
         </button>
       </form>

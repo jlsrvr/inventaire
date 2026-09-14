@@ -8,7 +8,6 @@ import { strings } from './strings'
 import { Enrol } from './components/Enrol'
 import { ItemForm, type ItemFormValues } from './components/ItemForm'
 import { ItemList } from './components/ItemList'
-import './App.css'
 
 const EMPTY_ITEMS: LocalItem[] = []
 
@@ -89,39 +88,68 @@ function App() {
     setEditing(null)
   }
 
+  const tabBase = 'mr-5 -mb-0.5 border-b-2 px-1 pb-2 font-semibold'
+  const tabInactive = 'border-transparent text-[#94836c]'
+  const tabActive = 'border-accent text-accent-hover'
+
   return (
-    <div className="app">
-      <header>
-        <h1>{strings.appName}</h1>
-        {syncing && <span className="sync-status">{strings.syncing}</span>}
-        {!navigator.onLine && <span className="sync-status">{strings.syncOffline}</span>}
+    <div className="mx-auto max-w-[640px] p-4">
+      <header className="mb-4 flex items-baseline gap-3">
+        <h1 className="text-xl font-semibold text-accent-hover">{strings.appName}</h1>
+        {syncing && <span className="text-xs text-slate-500">{strings.syncing}</span>}
+        {!navigator.onLine && (
+          <span className="text-xs text-slate-500">{strings.syncOffline}</span>
+        )}
       </header>
 
       {needRefresh && (
-        <div className="update-banner">
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-accent px-3 py-2 text-white">
           <span>{strings.updateAvailable}</span>
-          <button onClick={() => updateServiceWorker(true)}>{strings.reload}</button>
+          <button
+            className="rounded-md bg-white px-3 py-1.5 font-semibold text-accent-hover"
+            onClick={() => updateServiceWorker(true)}
+          >
+            {strings.reload}
+          </button>
         </div>
       )}
 
-      <div className="toolbar">
+      <div className="mb-4 flex flex-wrap gap-2">
         <input
-          className="search"
+          className="min-w-[150px] flex-1 rounded-md border border-[#e7cba9] bg-white p-2 text-slate-900 focus:outline focus:outline-2 focus:outline-accent focus:outline-offset-1"
           placeholder={strings.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <button
-          className={showShoppingList ? 'active' : undefined}
-          onClick={() => setShowShoppingList((v) => !v)}
+          className="rounded-md border border-accent bg-accent px-3 py-2 font-semibold text-white hover:border-accent-hover hover:bg-accent-hover"
+          onClick={() => setEditing('new')}
         >
-          {showShoppingList ? strings.showAll : strings.showShoppingList}
+          {strings.addItem}
         </button>
-        <button onClick={() => setEditing('new')}>{strings.addItem}</button>
+      </div>
+
+      <div className="mb-4 flex gap-1 border-b-2 border-[#f1e2cc]" role="tablist">
+        <button
+          role="tab"
+          aria-selected={!showShoppingList}
+          className={`${tabBase} ${!showShoppingList ? tabActive : tabInactive}`}
+          onClick={() => setShowShoppingList(false)}
+        >
+          {strings.showAll}
+        </button>
+        <button
+          role="tab"
+          aria-selected={showShoppingList}
+          className={`${tabBase} ${showShoppingList ? tabActive : tabInactive}`}
+          onClick={() => setShowShoppingList(true)}
+        >
+          {strings.showShoppingList}
+        </button>
       </div>
 
       {visible.length === 0 ? (
-        <p className="empty">
+        <p className="mt-8 text-center text-slate-500">
           {showShoppingList ? strings.shoppingListEmpty : strings.emptyList}
         </p>
       ) : (
@@ -129,7 +157,7 @@ function App() {
       )}
 
       {editing && (
-        <div className="modal">
+        <div className="fixed inset-0 flex items-end justify-center bg-black/40">
           <ItemForm
             initial={editing === 'new' ? undefined : editing}
             onSave={handleSave}

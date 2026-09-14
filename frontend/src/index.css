@@ -1,7 +1,19 @@
-:root {
-  color-scheme: light dark;
+@import 'tailwindcss';
+
+@theme {
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-soft: #ffedd5;
 }
 
-* {
-  font: inherit;
+:root {
+  /* The whole app is a hardcoded light palette with no dark variant, so
+     don't opt form controls into dark-mode UA styling. */
+  color-scheme: light;
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-[#fdf6ec] font-sans text-slate-900;
+  }
 }
