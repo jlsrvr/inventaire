@@ -170,7 +170,12 @@ function App() {
       {visible.length === 0 ? (
         <p className="mt-8 text-center text-slate-500">{emptyMessage}</p>
       ) : (
-        <ItemList items={visible} onAdjust={handleAdjust} onEdit={setEditing} />
+        <ItemList
+          items={visible}
+          onAdjust={handleAdjust}
+          onEdit={setEditing}
+          showCategory={filter === 'all' || filter === 'shopping'}
+        />
       )}
 
       {editing && (

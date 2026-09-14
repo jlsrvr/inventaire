@@ -7,10 +7,12 @@ export function ItemList({
   items,
   onAdjust,
   onEdit,
+  showCategory = true,
 }: {
   items: LocalItem[]
   onAdjust: (id: string, delta: number) => void
   onEdit: (item: LocalItem) => void
+  showCategory?: boolean
 }) {
   if (items.length === 0) {
     return <p className="mt-8 text-center text-slate-500">{strings.noResults}</p>
@@ -32,15 +34,19 @@ export function ItemList({
             onClick={() => onEdit(item)}
           >
             <span className="font-semibold">{item.name}</span>
-            <span className="flex items-center gap-1.5 text-xs text-slate-500">
-              <span
-                className={`inline-block rounded-full px-2 py-0.5 text-[0.72rem] font-semibold ${chipClassesFor(item.category)}`}
-              >
-                {categoryLabels[item.category as keyof typeof categoryLabels] ??
-                  item.category}
+            {(showCategory || item.unit) && (
+              <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                {showCategory && (
+                  <span
+                    className={`inline-block rounded-full px-2 py-0.5 text-[0.72rem] font-semibold ${chipClassesFor(item.category)}`}
+                  >
+                    {categoryLabels[item.category as keyof typeof categoryLabels] ??
+                      item.category}
+                  </span>
+                )}
+                {item.unit ? <span className="text-slate-400">{item.unit}</span> : null}
               </span>
-              {item.unit ? <span className="text-slate-400">{item.unit}</span> : null}
-            </span>
+            )}
             <span className="text-[0.7rem] text-slate-400">
               {strings.updatedOn} {formatUpdatedAt(item.updated_at)} {strings.updatedBy}{' '}
               {item.updated_by}
