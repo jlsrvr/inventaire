@@ -47,5 +47,13 @@ export default defineConfig({
     // Leading-dot entries match any subdomain, so this survives ngrok handing
     // out a new random subdomain on each free-tier tunnel restart.
     allowedHosts: ['.ngrok-free.dev'],
+    // Forward API calls to the backend server-side, so a single ngrok tunnel
+    // to the frontend is enough — the browser only ever sees one origin, and
+    // ngrok's free tier only allows one tunnel at a time anyway.
+    proxy: {
+      '/auth': 'http://localhost:8000',
+      '/sync': 'http://localhost:8000',
+      '/health': 'http://localhost:8000',
+    },
   },
 })
