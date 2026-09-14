@@ -4,10 +4,13 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { db, getMeta, saveItem, adjustQuantity, type LocalItem } from './db'
 import { normalise } from './lib/normalise'
 import { sync } from './lib/sync'
-import { strings } from './strings'
+import { strings, categoryLabels } from './strings'
+import { CATEGORIES, type CategorySlug } from './lib/categories'
 import { Enrol } from './components/Enrol'
 import { ItemForm, type ItemFormValues } from './components/ItemForm'
 import { ItemList } from './components/ItemList'
+
+type Filter = 'all' | 'shopping' | CategorySlug
 
 const EMPTY_ITEMS: LocalItem[] = []
 
@@ -47,7 +50,7 @@ function App() {
   const enrolled = firstName !== undefined && firstName !== null
 
   const [search, setSearch] = useState('')
-  const [showShoppingList, setShowShoppingList] = useState(false)
+  const [filter, setFilter] = useState<Filter>('all')
   const [editing, setEditing] = useState<LocalItem | 'new' | null>(null)
 
   const { syncing } = useSyncOnConnectivity(enrolled)
@@ -62,9 +65,13 @@ function App() {
   const visible = useMemo(() => {
     const term = normalise(search.trim())
     let filtered = items.filter((item) => item.search_name.includes(term))
-    if (showShoppingList) filtered = filtered.filter((item) => item.quantity === 0)
+    if (filter === 'shopping') {
+      filtered = filtered.filter((item) => item.quantity === 0)
+    } else if (filter !== 'all') {
+      filtered = filtered.filter((item) => item.category === filter)
+    }
     return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
-  }, [items, search, showShoppingList])
+  }, [items, search, filter])
 
   if (!enrolled) {
     return <Enrol onEnrolled={() => {}} />
@@ -88,9 +95,23 @@ function App() {
     setEditing(null)
   }
 
-  const tabBase = 'mr-5 -mb-0.5 border-b-2 px-1 pb-2 font-semibold'
+  const tabs: { key: Filter; label: string }[] = [
+    { key: 'all', label: strings.showAll },
+    { key: 'shopping', label: strings.showShoppingList },
+    ...CATEGORIES.map((slug) => ({ key: slug, label: categoryLabels[slug] })),
+  ]
+
+  const tabBase = 'shrink-0 mr-5 -mb-0.5 border-b-2 px-1 pb-2 font-semibold whitespace-nowrap'
   const tabInactive = 'border-transparent text-[#94836c]'
   const tabActive = 'border-accent text-accent-hover'
+
+  const emptyMessage = search.trim()
+    ? strings.noResults
+    : filter === 'shopping'
+      ? strings.shoppingListEmpty
+      : filter === 'all'
+        ? strings.emptyList
+        : strings.categoryEmpty
 
   return (
     <div className="mx-auto max-w-[640px] p-4">
@@ -129,29 +150,25 @@ function App() {
         </button>
       </div>
 
-      <div className="mb-4 flex gap-1 border-b-2 border-[#f1e2cc]" role="tablist">
-        <button
-          role="tab"
-          aria-selected={!showShoppingList}
-          className={`${tabBase} ${!showShoppingList ? tabActive : tabInactive}`}
-          onClick={() => setShowShoppingList(false)}
-        >
-          {strings.showAll}
-        </button>
-        <button
-          role="tab"
-          aria-selected={showShoppingList}
-          className={`${tabBase} ${showShoppingList ? tabActive : tabInactive}`}
-          onClick={() => setShowShoppingList(true)}
-        >
-          {strings.showShoppingList}
-        </button>
+      <div
+        className="mb-4 flex overflow-x-auto border-b-2 border-[#f1e2cc]"
+        role="tablist"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            role="tab"
+            aria-selected={filter === tab.key}
+            className={`${tabBase} ${filter === tab.key ? tabActive : tabInactive}`}
+            onClick={() => setFilter(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {visible.length === 0 ? (
-        <p className="mt-8 text-center text-slate-500">
-          {showShoppingList ? strings.shoppingListEmpty : strings.emptyList}
-        </p>
+        <p className="mt-8 text-center text-slate-500">{emptyMessage}</p>
       ) : (
         <ItemList items={visible} onAdjust={handleAdjust} onEdit={setEditing} />
       )}

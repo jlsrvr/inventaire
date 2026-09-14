@@ -20,6 +20,7 @@ export const strings = {
   showAll: 'Tout',
   showShoppingList: 'Liste de courses',
   shoppingListEmpty: 'Rien à racheter.',
+  categoryEmpty: 'Aucun article dans cette catégorie.',
   updatedOn: 'Modifié le',
   updatedBy: 'par',
   // Form
@@ -45,7 +46,6 @@ export const categoryLabels: Record<CategorySlug, string> = {
   boissons: 'Boissons',
   entretien: 'Entretien',
   hygiene: 'Hygiène',
-  cuisine: 'Cuisine',
   outils: 'Outils',
   other: 'Autre',
 }

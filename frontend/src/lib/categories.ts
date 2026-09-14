@@ -4,7 +4,6 @@ export const CATEGORIES = [
   'boissons',
   'entretien',
   'hygiene',
-  'cuisine',
   'outils',
   'other',
 ] as const
