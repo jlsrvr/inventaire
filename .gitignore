@@ -222,3 +222,6 @@ backend/*.db
 backend/*.db-wal
 backend/*.db-shm
 backend/openapi.json
+
+# The Python "lib/" rule above also matches frontend/src/lib/ — un-ignore it.
+!frontend/src/lib/
