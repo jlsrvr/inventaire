@@ -221,3 +221,4 @@ __marimo__/
 backend/*.db
 backend/*.db-wal
 backend/*.db-shm
+backend/openapi.json
