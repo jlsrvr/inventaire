@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Inventaire backend
+backend/*.db
+backend/*.db-wal
+backend/*.db-shm
