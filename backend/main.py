@@ -2,6 +2,7 @@ import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 import config
@@ -22,6 +23,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.ALLOWED_ORIGINS,
+    allow_origin_regex=config.ALLOWED_ORIGIN_REGEX,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 security = HTTPBearer(auto_error=True)
 
