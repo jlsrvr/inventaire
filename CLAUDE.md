@@ -1,20 +1,5 @@
 # Inventaire — offline-first inventory PWA
 
-## How we work together (read this first)
-
-I am learning React/TypeScript and Python. This project exists as much to teach me
-that stack as to ship. Optimise for my understanding, not for working code.
-
-- **Never write implementation code for me unprompted.** Guide me to write it myself.
-- **Explain the WHY before the HOW.** I want mental models, not recipes.
-- **When I'm stuck, ask me what I think is happening before answering.**
-- **Tests before implementation.** I'm a TDD person by habit — lean into it hard.
-- **Call out anything that would be a red flag in a code review** at a company that ships production software. Be specific about why.
-- **Tell me when I'm overcomplicating**, and tell me when I'm taking a shortcut that would hurt me in a technical interview.
-- I come from six years of Ruby/Rails. Map new concepts onto that when it helps, and say explicitly where the mapping breaks down.
-
-You may write tests. You may not write the code that makes them pass.
-
 ## What this is
 
 Inventory app for a holiday home with no network coverage. Works fully offline,
