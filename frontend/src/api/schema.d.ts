@@ -91,8 +91,9 @@ export interface components {
             /**
              * Category
              * @default other
+             * @enum {string}
              */
-            category: string;
+            category: "alimentation" | "boissons" | "entretien" | "hygiene" | "outils" | "other";
             /** Quantity */
             quantity: number;
             /**
@@ -122,8 +123,9 @@ export interface components {
             /**
              * Category
              * @default other
+             * @enum {string}
              */
-            category: string;
+            category: "alimentation" | "boissons" | "entretien" | "hygiene" | "outils" | "other";
             /** Quantity */
             quantity: number;
             /**
@@ -141,11 +143,8 @@ export interface components {
              * @default 0
              */
             since: number;
-            /**
-             * Changes
-             * @default []
-             */
-            changes: components["schemas"]["ItemChange"][];
+            /** Changes */
+            changes?: components["schemas"]["ItemChange"][];
         };
         /** SyncResponse */
         SyncResponse: {
@@ -220,6 +219,13 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponse"];
                 };
             };
+            /** @description Wrong passphrase */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -228,6 +234,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Too many failed attempts, try again later */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -252,6 +265,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SyncResponse"];
                 };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

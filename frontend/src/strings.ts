@@ -12,7 +12,12 @@ export const strings = {
   enrolWrongPassphrase: 'Mot de passe incorrect.',
   enrolOffline:
     'Impossible de vérifier le mot de passe hors ligne. Réessayez avec du réseau.',
+  enrolTooManyAttempts: 'Trop de tentatives. Réessayez dans quelques minutes.',
+  reenrolTitle: 'Mot de passe à ressaisir',
+  reenrolIntro:
+    'Le serveur a refusé la connexion. Ressaisissez le mot de passe partagé pour reprendre la synchronisation. Vos modifications sont conservées.',
   // List
+  searchLabel: 'Rechercher un article',
   searchPlaceholder: 'Rechercher un article…',
   addItem: 'Ajouter',
   emptyList: 'Aucun article. Ajoutez-en un.',
@@ -23,6 +28,8 @@ export const strings = {
   categoryEmpty: 'Aucun article dans cette catégorie.',
   updatedOn: 'Modifié le',
   updatedBy: 'par',
+  decrease: (name: string) => `Retirer 1 à ${name}`,
+  increase: (name: string) => `Ajouter 1 à ${name}`,
   // Form
   formAddTitle: 'Nouvel article',
   formEditTitle: 'Modifier l’article',
@@ -36,6 +43,8 @@ export const strings = {
   syncing: 'Synchronisation…',
   syncOffline: 'Hors ligne',
   syncError: 'Échec de la synchronisation',
+  syncUnauthorized: 'Synchronisation suspendue : mot de passe à ressaisir.',
+  reenrolAction: 'Ressaisir',
   // PWA
   updateAvailable: 'Une nouvelle version est disponible.',
   reload: 'Recharger',

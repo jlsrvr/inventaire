@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { db, saveItem, adjustQuantity, type LocalItem } from './db'
+import { db, saveItem, adjustQuantity, roundQuantity, type LocalItem } from './db'
 
 beforeEach(async () => {
   await db.items.clear()
@@ -44,7 +44,49 @@ describe('saveItem', () => {
   })
 })
 
+describe('saveItem from an edit form', () => {
+  it('only writes fields the user changed, keeping values synced in meanwhile', async () => {
+    const id = await saveItem({ name: 'Café', quantity: 3, category: 'alimentation' }, 'John')
+    const base = (await db.items.get(id))!
+
+    // While the form is open, a sync brings in Jane's quantity change.
+    await db.items.update(id, { quantity: 7, dirty: 0 })
+
+    // The user only renamed the item.
+    await saveItem(
+      { id, name: 'Café moulu', quantity: base.quantity, category: base.category, unit: base.unit },
+      'John',
+      base,
+    )
+    const row = await db.items.get(id)
+    expect(row?.name).toBe('Café moulu')
+    expect(row?.quantity).toBe(7)
+  })
+
+  it('saving an unchanged form does not bump updated_at', async () => {
+    const id = await saveItem({ name: 'Café', quantity: 3 }, 'John')
+    await db.items.update(id, { dirty: 0, updated_at: '2026-01-01T00:00:00.000Z' })
+    const base = (await db.items.get(id))!
+
+    await saveItem({ id, name: 'Café', quantity: 3, category: base.category, unit: null }, 'Jane', base)
+    const row = await db.items.get(id)
+    expect(row?.updated_at).toBe('2026-01-01T00:00:00.000Z')
+    expect(row?.dirty).toBe(0)
+  })
+})
+
 describe('adjustQuantity', () => {
+  it('does not accumulate float noise on decimal quantities', async () => {
+    const id = await saveItem({ name: 'Farine', quantity: 1.1, unit: 'kg' }, 'John')
+    await adjustQuantity(id, -1, 'John')
+    expect((await db.items.get(id))?.quantity).toBe(0.1)
+  })
+
+  it('roundQuantity keeps three decimals and never goes negative', () => {
+    expect(roundQuantity(0.1 + 0.2)).toBe(0.3)
+    expect(roundQuantity(-2)).toBe(0)
+  })
+
   it('never goes below zero', async () => {
     const id = await saveItem({ name: 'Café', quantity: 1 }, 'John')
     await adjustQuantity(id, -5, 'John')

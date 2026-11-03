@@ -3,6 +3,7 @@ import type { AuthResponse } from '../api/types'
 import { API_URL } from './api'
 
 export class WrongPassphrase extends Error {}
+export class TooManyAttempts extends Error {}
 
 /**
  * Exchange the shared passphrase for a long-lived token and remember the user's
@@ -19,6 +20,7 @@ export async function enrol(
     body: JSON.stringify({ passphrase }),
   })
   if (res.status === 401) throw new WrongPassphrase()
+  if (res.status === 429) throw new TooManyAttempts()
   if (!res.ok) throw new Error(`auth failed: ${res.status}`)
 
   const body: AuthResponse = await res.json()

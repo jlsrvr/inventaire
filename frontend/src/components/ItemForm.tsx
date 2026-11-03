@@ -3,6 +3,8 @@ import { strings, categoryLabels } from '../strings'
 import { CATEGORIES, DEFAULT_CATEGORY } from '../lib/categories'
 import type { LocalItem } from '../db'
 
+export const ITEM_FORM_TITLE_ID = 'item-form-title'
+
 export interface ItemFormValues {
   name: string
   category: string
@@ -38,7 +40,7 @@ export function ItemForm({
       className="flex w-full max-w-[480px] flex-col gap-3 rounded-t-xl border-t-4 border-accent bg-white p-4"
       onSubmit={handleSubmit}
     >
-      <h2 className="m-0 text-accent-hover">
+      <h2 id={ITEM_FORM_TITLE_ID} className="m-0 text-accent-hover">
         {initial ? strings.formEditTitle : strings.formAddTitle}
       </h2>
       <label className="flex flex-col gap-1 text-sm text-slate-700">

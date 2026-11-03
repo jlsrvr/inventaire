@@ -8,7 +8,7 @@ def make_change(**overrides):
         "category": "alimentation",
         "quantity": 3,
         "unit": None,
-        "updated_at": "2026-08-09T12:00:00",
+        "updated_at": "2026-08-09T12:00:00Z",
         "updated_by": "John",
     }
     change.update(overrides)
@@ -59,12 +59,12 @@ def test_pushed_row_comes_back_with_server_seq(client, auth_headers):
 
 
 def test_sync_rejects_stale_write(client, auth_headers):
-    change = make_change(updated_at="2026-08-09T12:00:00")
+    change = make_change(updated_at="2026-08-09T12:00:00Z")
     client.post("/sync", json={"since": 0, "changes": [change]}, headers=auth_headers)
 
     # Same id, older timestamp → must be rejected, stored value unchanged.
     stale = make_change(
-        id=change["id"], name="Thé", updated_at="2026-08-09T11:00:00"
+        id=change["id"], name="Thé", updated_at="2026-08-09T11:00:00Z"
     )
     body = client.post(
         "/sync", json={"since": 0, "changes": [stale]}, headers=auth_headers
@@ -75,11 +75,11 @@ def test_sync_rejects_stale_write(client, auth_headers):
 
 
 def test_sync_accepts_newer_write(client, auth_headers):
-    change = make_change(updated_at="2026-08-09T12:00:00")
+    change = make_change(updated_at="2026-08-09T12:00:00Z")
     client.post("/sync", json={"since": 0, "changes": [change]}, headers=auth_headers)
 
     newer = make_change(
-        id=change["id"], name="Thé", updated_at="2026-08-09T13:00:00"
+        id=change["id"], name="Thé", updated_at="2026-08-09T13:00:00Z"
     )
     body = client.post(
         "/sync", json={"since": 0, "changes": [newer]}, headers=auth_headers

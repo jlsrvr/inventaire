@@ -9,7 +9,7 @@ def test_category_defaults_to_other():
         id=uuid.uuid4(),
         name="Café",
         quantity=3,
-        updated_at="2026-08-09T12:00:00",
+        updated_at="2026-08-09T12:00:00Z",
         updated_by="John",
     )
 
@@ -22,7 +22,7 @@ def test_rejects_negative_quantity():
             id=uuid.uuid4(),
             name="Café",
             quantity=-1,
-            updated_at="2026-08-09T12:00:00",
+            updated_at="2026-08-09T12:00:00Z",
             updated_by="John",
         )
 
@@ -33,7 +33,7 @@ def test_accepts_zero_quantity():
         id=uuid.uuid4(),
         name="Café",
         quantity=0,
-        updated_at="2026-08-09T12:00:00",
+        updated_at="2026-08-09T12:00:00Z",
         updated_by="John",
     )
 
@@ -47,7 +47,7 @@ def test_accepts_decimal_quantity():
         name="Farine",
         unit="kg",
         quantity=1.5,
-        updated_at="2026-08-09T12:00:00",
+        updated_at="2026-08-09T12:00:00Z",
         updated_by="John",
     )
 
@@ -59,7 +59,7 @@ def test_unit_defaults_to_none():
         id=uuid.uuid4(),
         name="Café",
         quantity=3,
-        updated_at="2026-08-09T12:00:00",
+        updated_at="2026-08-09T12:00:00Z",
         updated_by="John",
     )
 
@@ -72,7 +72,7 @@ def test_unit_can_be_filled():
         name="Café",
         unit=unit,
         quantity=3,
-        updated_at="2026-08-09T12:00:00",
+        updated_at="2026-08-09T12:00:00Z",
         updated_by="John",
     )
 

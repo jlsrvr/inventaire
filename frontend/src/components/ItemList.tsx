@@ -1,6 +1,7 @@
 import { strings, categoryLabels } from '../strings'
 import { chipClassesFor } from '../lib/categoryColors'
 import { formatUpdatedAt } from '../lib/formatDate'
+import { formatQuantity } from '../lib/formatQuantity'
 import type { LocalItem } from '../db'
 
 export function ItemList({
@@ -51,7 +52,7 @@ export function ItemList({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                aria-label="-1"
+                aria-label={strings.decrease(item.name)}
                 className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => onAdjust(item.id, -1)}
                 disabled={item.quantity === 0}
@@ -59,11 +60,11 @@ export function ItemList({
                 −
               </button>
               <span className="min-w-6 text-center font-semibold tabular-nums">
-                {item.quantity}
+                {formatQuantity(item.quantity)}
               </span>
               <button
                 type="button"
-                aria-label="+1"
+                aria-label={strings.increase(item.name)}
                 className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover"
                 onClick={() => onAdjust(item.id, 1)}
               >

@@ -25,9 +25,9 @@ Single `items` table:
 | `id`         | uuid, **generated client-side** (makes push idempotent) |
 | `name`       | text, editable                                     |
 | `category`   | slug from a code-defined list, editable, defaults to `other` |
-| `quantity`   | integer                                            |
+| `quantity`   | number ≥ 0, decimals allowed (1.5 kg), kept to 3 places |
 | `unit`       | text, optional ("bouteilles", "kg")                |
-| `updated_at` | client clock — decides **which write wins**        |
+| `updated_at` | client clock — decides **which write wins**. Always tz-aware; stored/returned as UTC `YYYY-MM-DDTHH:MM:SS.sssZ` (= JS `toISOString()`) |
 | `updated_by` | first name, captured once at enrolment             |
 | `seq`        | server-assigned counter — decides **what a client has seen** |
 
@@ -51,13 +51,24 @@ collapse them.
 
 `POST /sync` — `{ since: seq, changes: [...] }` → `{ cursor, changes, rejected }`
 
-Server, one transaction: upsert each pushed row by `id`, reject as stale if stored
-`updated_at` >= incoming, assign next `seq` to accepted rows, **then** select
-`seq > since`. Order matters — clients get the canonical version of their own writes
-back, so the client merge has no special cases.
+Server, one `BEGIN IMMEDIATE` transaction: upsert each pushed row by `id`, reject as
+stale if stored `updated_at` >= incoming, assign next `seq` to accepted rows, **then**
+select `seq > since` **plus every rejected id**. Order matters — clients get the
+canonical version of their own writes back, and the winner of every rejected write,
+so the client merge has no special cases. A `since` ahead of the server's max seq
+(DB restored from backup) is treated as 0. Max 500 changes per request.
 
 Client, one IndexedDB transaction: apply changes, clear only the outbox rows
-snapshotted before the request, save cursor last.
+snapshotted before the request, save cursor last. The client never compares
+timestamps: a returned row replaces the local one unless the local row is dirty and
+no longer the exact version that was sent (edited while the request was in flight).
+
+## Running locally
+
+Backend: `cd backend && INVENTAIRE_DEV=1 uv run uvicorn main:app --reload`.
+Without `INVENTAIRE_DEV=1` the server refuses to start unless `INVENTAIRE_PASSPHRASE`
+and `INVENTAIRE_TOKEN` are set — no silent `chalet` fallback in production.
+After changing server models, regenerate client types (`npm run gen:types`).
 
 ## Conventions
 
@@ -66,5 +77,7 @@ snapshotted before the request, save cursor last.
   alongside `name`: `s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase()`.
   Never display the normalised form.
 - Sort with `localeCompare(a, b, 'fr')`.
-- Category slugs are ASCII; French labels come from a lookup.
+- Category slugs are ASCII; French labels come from a lookup. The slug list lives in
+  `frontend/src/lib/categories.ts` **and** the `Category` literal in
+  `backend/models.py` — add a slug to both, deploy the server first.
 - Keep the bundle small — first load may happen on weak signal.

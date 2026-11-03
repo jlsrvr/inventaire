@@ -1,59 +1,37 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { db, getMeta, saveItem, adjustQuantity, type LocalItem } from './db'
 import { normalise } from './lib/normalise'
-import { sync } from './lib/sync'
 import { strings, categoryLabels } from './strings'
 import { CATEGORIES, type CategorySlug } from './lib/categories'
-import { Enrol } from './components/Enrol'
-import { ItemForm, type ItemFormValues } from './components/ItemForm'
+import { Enrol, ENROL_TITLE_ID } from './components/Enrol'
+import { ItemForm, ITEM_FORM_TITLE_ID, type ItemFormValues } from './components/ItemForm'
 import { ItemList } from './components/ItemList'
+import { Dialog } from './components/Dialog'
+import { useOnline } from './hooks/useOnline'
+import { useSync } from './hooks/useSync'
 
 type Filter = 'all' | 'shopping' | CategorySlug
 
 const EMPTY_ITEMS: LocalItem[] = []
 
-function useSyncOnConnectivity(enabled: boolean) {
-  const [syncing, setSyncing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!enabled) return
-
-    let cancelled = false
-    async function run() {
-      setSyncing(true)
-      setError(null)
-      try {
-        await sync()
-      } catch {
-        if (!cancelled) setError(strings.syncError)
-      } finally {
-        if (!cancelled) setSyncing(false)
-      }
-    }
-
-    run()
-    window.addEventListener('online', run)
-    return () => {
-      cancelled = true
-      window.removeEventListener('online', run)
-    }
-  }, [enabled])
-
-  return { syncing, error }
-}
-
 function App() {
-  const firstName = useLiveQuery(() => getMeta<string>('firstName'))
-  const enrolled = firstName !== undefined && firstName !== null
+  // `undefined` while IndexedDB is still loading — distinct from "not enrolled",
+  // so an enrolled user never sees the enrolment form flash on launch.
+  const me = useLiveQuery(async () => ({
+    firstName: (await getMeta<string>('firstName')) ?? null,
+  }))
+  const firstName = me?.firstName ?? null
+  const enrolled = firstName !== null
 
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [editing, setEditing] = useState<LocalItem | 'new' | null>(null)
+  const [reenrolling, setReenrolling] = useState(false)
 
-  const { syncing } = useSyncOnConnectivity(enrolled)
+  const online = useOnline()
+  const { syncing, error: syncError, requestSync, syncNow } = useSync(enrolled)
 
   const {
     needRefresh: [needRefresh],
@@ -73,12 +51,14 @@ function App() {
     return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
   }, [items, search, filter])
 
+  if (me === undefined) return null
   if (!enrolled) {
     return <Enrol onEnrolled={() => {}} />
   }
 
   async function handleAdjust(id: string, delta: number) {
     await adjustQuantity(id, delta, firstName!)
+    requestSync()
   }
 
   async function handleSave(values: ItemFormValues) {
@@ -91,8 +71,10 @@ function App() {
         unit: values.unit,
       },
       firstName!,
+      editing !== 'new' && editing ? editing : undefined,
     )
     setEditing(null)
+    requestSync()
   }
 
   const tabs: { key: Filter; label: string }[] = [
@@ -117,11 +99,28 @@ function App() {
     <div className="mx-auto max-w-[640px] p-4">
       <header className="mb-4 flex items-baseline gap-3">
         <h1 className="text-xl font-semibold text-accent-hover">{strings.appName}</h1>
-        {syncing && <span className="text-xs text-slate-500">{strings.syncing}</span>}
-        {!navigator.onLine && (
-          <span className="text-xs text-slate-500">{strings.syncOffline}</span>
-        )}
+        <span role="status" className="text-xs text-slate-500">
+          {!online
+            ? strings.syncOffline
+            : syncing
+              ? strings.syncing
+              : syncError === 'failed'
+                ? strings.syncError
+                : ''}
+        </span>
       </header>
+
+      {syncError === 'unauthorized' && (
+        <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-amber-100 px-3 py-2 text-amber-900">
+          <span>{strings.syncUnauthorized}</span>
+          <button
+            className="shrink-0 rounded-md bg-white px-3 py-1.5 font-semibold text-accent-hover"
+            onClick={() => setReenrolling(true)}
+          >
+            {strings.reenrolAction}
+          </button>
+        </div>
+      )}
 
       {needRefresh && (
         <div className="mb-4 flex items-center justify-between rounded-lg bg-accent px-3 py-2 text-white">
@@ -137,6 +136,8 @@ function App() {
 
       <div className="mb-4 flex flex-wrap gap-2">
         <input
+          type="search"
+          aria-label={strings.searchLabel}
           className="min-w-[150px] flex-1 rounded-md border border-[#e7cba9] bg-white p-2 text-slate-900 focus:outline focus:outline-2 focus:outline-accent focus:outline-offset-1"
           placeholder={strings.searchPlaceholder}
           value={search}
@@ -179,13 +180,26 @@ function App() {
       )}
 
       {editing && (
-        <div className="fixed inset-0 flex items-end justify-center bg-black/40">
+        <Dialog labelledBy={ITEM_FORM_TITLE_ID} onClose={() => setEditing(null)}>
           <ItemForm
             initial={editing === 'new' ? undefined : editing}
             onSave={handleSave}
             onCancel={() => setEditing(null)}
           />
-        </div>
+        </Dialog>
+      )}
+
+      {reenrolling && (
+        <Dialog labelledBy={ENROL_TITLE_ID} onClose={() => setReenrolling(false)}>
+          <Enrol
+            reenrol
+            initialFirstName={firstName!}
+            onEnrolled={() => {
+              setReenrolling(false)
+              syncNow()
+            }}
+          />
+        </Dialog>
       )}
     </div>
   )

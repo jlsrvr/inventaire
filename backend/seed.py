@@ -11,10 +11,10 @@ Add --force to seed even if the items table already has rows.
 
 import sys
 import uuid
-import datetime
 
 import config
 import db
+import timestamps
 
 # (name, category, quantity, unit)
 SEED_ITEMS = [
@@ -145,7 +145,7 @@ def seed(force: bool = False) -> None:
             return
 
         next_seq = conn.execute("SELECT COALESCE(MAX(seq), 0) FROM items").fetchone()[0]
-        now = datetime.datetime.now().isoformat()
+        now = timestamps.format(timestamps.now())
 
         for name, category, quantity, unit in SEED_ITEMS:
             next_seq += 1

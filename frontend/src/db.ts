@@ -55,6 +55,14 @@ export async function setMeta(key: string, value: unknown): Promise<void> {
 
 // --- item mutations ---------------------------------------------------------
 
+/**
+ * Quantities may be decimal (1.5 kg) but are kept to 3 places, so ±1 steps
+ * never accumulate float noise like 0.10000000000000009.
+ */
+export function roundQuantity(quantity: number): number {
+  return Math.max(0, Math.round(quantity * 1000) / 1000)
+}
+
 export interface ItemInput {
   id?: string
   name: string
@@ -63,26 +71,58 @@ export interface ItemInput {
   unit?: string | null
 }
 
+type EditableFields = Pick<LocalItem, 'name' | 'category' | 'quantity' | 'unit'>
+const EDITABLE: (keyof EditableFields)[] = ['name', 'category', 'quantity', 'unit']
+
+function cleanInput(input: ItemInput): EditableFields {
+  return {
+    name: input.name.trim(),
+    category: input.category ?? DEFAULT_CATEGORY,
+    quantity: roundQuantity(input.quantity),
+    unit: input.unit?.trim() ? input.unit.trim() : null,
+  }
+}
+
 /**
  * Create or edit an item locally. Stamps the client clock and marks it dirty so
  * the next sync pushes it. `id` is client-generated on first write (idempotent).
+ *
+ * `base` is the item as it was when the user started editing. Only fields the
+ * user actually changed relative to it are written; the rest keep the current
+ * stored value, which may have arrived from a sync while the form was open.
  */
-export async function saveItem(input: ItemInput, updatedBy: string): Promise<string> {
+export async function saveItem(
+  input: ItemInput,
+  updatedBy: string,
+  base?: EditableFields,
+): Promise<string> {
   const id = input.id ?? crypto.randomUUID()
-  const existing = input.id ? await db.items.get(input.id) : undefined
-  const item: LocalItem = {
-    id,
-    name: input.name.trim(),
-    search_name: normalise(input.name),
-    category: input.category ?? DEFAULT_CATEGORY,
-    quantity: input.quantity,
-    unit: input.unit?.trim() ? input.unit.trim() : null,
-    updated_at: new Date().toISOString(),
-    updated_by: updatedBy,
-    seq: existing?.seq ?? 0,
-    dirty: 1,
-  }
-  await db.items.put(item)
+  const wanted = cleanInput(input)
+
+  await db.transaction('rw', db.items, async () => {
+    const existing = input.id ? await db.items.get(input.id) : undefined
+    const next: EditableFields = { ...wanted }
+    if (existing && base) {
+      for (const field of EDITABLE) {
+        if (wanted[field] === base[field]) {
+          ;(next as Record<string, unknown>)[field] = existing[field]
+        }
+      }
+    }
+    // Saving an unchanged form must not bump updated_at — that would make a
+    // no-op win last-write-wins over someone else's real edit.
+    if (existing && EDITABLE.every((field) => next[field] === existing[field])) return
+
+    await db.items.put({
+      id,
+      ...next,
+      search_name: normalise(next.name),
+      updated_at: new Date().toISOString(),
+      updated_by: updatedBy,
+      seq: existing?.seq ?? 0,
+      dirty: 1,
+    })
+  })
   return id
 }
 
@@ -92,15 +132,19 @@ export async function adjustQuantity(
   delta: number,
   updatedBy: string,
 ): Promise<void> {
-  const existing = await db.items.get(id)
-  if (!existing) return
-  const quantity = Math.max(0, existing.quantity + delta)
-  if (quantity === existing.quantity) return
-  await db.items.put({
-    ...existing,
-    quantity,
-    updated_at: new Date().toISOString(),
-    updated_by: updatedBy,
-    dirty: 1,
+  // Read and write in one transaction so a sync can't land in between and
+  // have its fields overwritten by our stale copy.
+  await db.transaction('rw', db.items, async () => {
+    const existing = await db.items.get(id)
+    if (!existing) return
+    const quantity = roundQuantity(existing.quantity + delta)
+    if (quantity === existing.quantity) return
+    await db.items.put({
+      ...existing,
+      quantity,
+      updated_at: new Date().toISOString(),
+      updated_by: updatedBy,
+      dirty: 1,
+    })
   })
 }
