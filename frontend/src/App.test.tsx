@@ -41,14 +41,14 @@ describe('App', () => {
     await saveItem({ name: 'Café', quantity: 3 }, 'John')
 
     render(<App />)
-    expect(screen.queryByText(strings.enrolTitle)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: strings.enrolSubmit })).not.toBeInTheDocument()
     expect(await screen.findByText('Café')).toBeInTheDocument()
-    expect(screen.queryByText(strings.enrolTitle)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: strings.enrolSubmit })).not.toBeInTheDocument()
   })
 
   it('shows enrolment when not enrolled', async () => {
     render(<App />)
-    expect(await screen.findByText(strings.enrolTitle)).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: strings.enrolSubmit })).toBeInTheDocument()
   })
 
   it('shows the offline banner with the unsent count only while offline', async () => {

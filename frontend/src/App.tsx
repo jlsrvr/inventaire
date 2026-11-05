@@ -7,9 +7,8 @@ import { formatRelativeMoment } from './lib/formatDate'
 import { LAST_SYNCED_AT } from './lib/sync'
 import { strings, categoryLabels } from './strings'
 import { CATEGORIES, DEFAULT_CATEGORY, type CategorySlug } from './lib/categories'
-import { Enrol, ENROL_TITLE_ID } from './components/Enrol'
+import { Enrol } from './components/Enrol'
 import { ItemForm, type ItemFormValues } from './components/ItemForm'
-import { Dialog } from './components/Dialog'
 import { Card } from './components/ui/Card'
 import { Chip } from './components/ui/Chip'
 import { ItemRow } from './components/ui/ItemRow'
@@ -222,16 +221,15 @@ function App() {
       )}
 
       {reenrolling && (
-        <Dialog labelledBy={ENROL_TITLE_ID} onClose={() => setReenrolling(false)}>
-          <Enrol
-            reenrol
-            initialFirstName={firstName!}
-            onEnrolled={() => {
-              setReenrolling(false)
-              syncNow()
-            }}
-          />
-        </Dialog>
+        <Enrol
+          reenrol
+          initialFirstName={firstName!}
+          onClose={() => setReenrolling(false)}
+          onEnrolled={() => {
+            setReenrolling(false)
+            syncNow()
+          }}
+        />
       )}
     </div>
   )

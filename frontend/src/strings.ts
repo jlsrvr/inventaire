@@ -4,11 +4,14 @@ import type { CategorySlug } from './lib/categories'
 export const strings = {
   appName: 'Inventaire',
   // Enrolment
-  enrolTitle: 'Bienvenue',
-  enrolIntro: 'Entrez votre prénom et le mot de passe partagé.',
+  enrolTagline: 'Ce qu’il y a au chalet, pour savoir quoi acheter avant de monter.',
+  enrolHelp: 'Pas de mot de passe ? Demandez-le à la personne qui vous a envoyé le lien.',
+  enrolOfflineNote: 'Une fois connecté, l’application marche aussi sans réseau, au chalet.',
+  showPassword: 'Afficher',
+  hidePassword: 'Masquer',
   firstName: 'Prénom',
   passphrase: 'Mot de passe',
-  enrolSubmit: 'Commencer',
+  enrolSubmit: 'Entrer',
   enrolWrongPassphrase: 'Mot de passe incorrect.',
   enrolOffline:
     'Impossible de vérifier le mot de passe hors ligne. Réessayez avec du réseau.',
