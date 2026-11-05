@@ -65,7 +65,9 @@ needs no open port at all.
 
 10. **Backups** — the Pi is the only copy of `inventaire.db`. The DB runs in WAL mode, so **don't `cp` the file** (recent writes live in `inventaire.db-wal`; a copy can be stale or torn). Use SQLite's online backup in a nightly cron job, then ship the result off the Pi along with `/etc/inventaire.env`:
     `sqlite3 /path/inventaire.db ".backup /path/backup-$(date +%F).db"`
-    **Restoring** an older backup is safe: clients whose cursor is ahead of the restored DB automatically get a full resend, and their unsynced edits are still in their outbox. Edits that reached the server after the backup but were already cleared from phones are lost — another reason for nightly backups.
+    **Restoring** an older backup mostly takes care of itself: a phone whose cursor is ahead of the restored DB gets a full resend on its next sync, and its unsynced edits are still in its outbox. Two known limits, accepted to keep the protocol simple:
+    - Edits that reached the server after the last backup and were already synced off phones are lost — another reason for nightly backups.
+    - If, after the restore, other phones push enough new edits to bring the server back past a stale phone's cursor *before* that phone syncs, it will miss those edits. To be safe, after a restore clear the app's site data on each phone (or re-install the PWA) and re-enrol, so it starts from cursor 0. Let each phone sync once against the restored server first, so its pending edits are pushed before its local data is wiped.
 
 11. **Cutover from the dev server** — IndexedDB is per origin, so devices used against the dev/ngrok URL start empty on the new domain. Before switching: sync every device against the old server, copy its DB to the Pi with `.backup` (not `cp`), then enrol each device on the new domain.
 
