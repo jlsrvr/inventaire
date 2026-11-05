@@ -2,12 +2,14 @@ import { strings } from '../../strings'
 import { CloudUpIcon } from './icons'
 
 /** Pink circle with a cloud-up arrow: this article has changes not sent yet. */
-export function PendingIcon() {
+export function PendingIcon({ decorative = false }: { decorative?: boolean }) {
+  // Decorative next to text that already says « Pas encore envoyé ».
+  const a11y = decorative
+    ? ({ 'aria-hidden': true } as const)
+    : ({ role: 'img', 'aria-label': strings.pending, title: strings.pending } as const)
   return (
     <span
-      role="img"
-      aria-label={strings.pending}
-      title={strings.pending}
+      {...a11y}
       className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary"
     >
       <CloudUpIcon size={14} />

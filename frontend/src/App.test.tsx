@@ -66,6 +66,22 @@ describe('App', () => {
     await waitFor(() => expect(screen.queryByText(strings.offlineTitle)).not.toBeInTheDocument())
   })
 
+  it('counts unsent changes on the sync button and lists them in the sheet', async () => {
+    syncMock.mockReturnValue(new Promise(() => {})) // keep them unsent
+    await enrolAs('John')
+    await saveItem({ name: 'Café', quantity: 3 }, 'John')
+    act(() => setOnline(false))
+    render(<App />)
+
+    const button = await screen.findByRole('button', {
+      name: strings.syncButton(strings.syncState.offline, 1),
+    })
+    act(() => button.click())
+    const sheet = await screen.findByRole('dialog', { name: strings.syncTitle })
+    expect(sheet).toHaveTextContent(strings.syncOfflineTitle)
+    expect(sheet).toHaveTextContent(strings.changeNew)
+  })
+
   it('groups articles by category in fixed order and filters the empty ones', async () => {
     await enrolAs('John')
     await saveItem({ name: 'Eau', category: 'boissons', quantity: 0 }, 'John')

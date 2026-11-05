@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatRelativeMoment } from './formatDate'
+import { formatRelativeMoment, formatShortMoment } from './formatDate'
 
 describe('formatRelativeMoment', () => {
   // Local-time constructors, so the test doesn't depend on the machine's zone.
@@ -24,5 +24,13 @@ describe('formatRelativeMoment', () => {
     expect(formatRelativeMoment(new Date(2025, 11, 24, 8, 0).toISOString(), now)).toBe(
       'le 24 décembre 2025 à 08:00',
     )
+  })
+})
+
+describe('formatShortMoment', () => {
+  const now = new Date(2026, 10, 5, 18, 0)
+  it('gives only the time for today, the relative form otherwise', () => {
+    expect(formatShortMoment(new Date(2026, 10, 5, 14, 5).toISOString(), now)).toBe('14:05')
+    expect(formatShortMoment(new Date(2026, 10, 4, 9, 0).toISOString(), now)).toBe('hier à 09:00')
   })
 })

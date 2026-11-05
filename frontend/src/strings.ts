@@ -66,6 +66,40 @@ export const strings = {
     n === 1
       ? '1 changement est gardé sur ce téléphone. Il partira dès que vous aurez du réseau.'
       : `${n} changements sont gardés sur ce téléphone. Ils partiront dès que vous aurez du réseau.`,
+  // Synchronisation
+  syncTitle: 'Synchronisation',
+  syncButton: (state: string, pending: number) =>
+    pending === 0
+      ? `Synchronisation : ${state}`
+      : `Synchronisation : ${state}, ${pending} changement${pending > 1 ? 's' : ''} en attente`,
+  syncState: {
+    offline: 'hors ligne',
+    syncing: 'envoi en cours',
+    unauthorized: 'mot de passe à ressaisir',
+    failed: 'échec',
+    pending: 'en attente d’envoi',
+    done: 'à jour',
+  },
+  syncOfflineTitle: 'En attente de réseau',
+  syncOfflineBody: (n: number) =>
+    n === 0
+      ? 'Aucun changement en attente sur ce téléphone.'
+      : n === 1
+        ? '1 changement est gardé sur ce téléphone. Rien n’est perdu : il partira dès que vous aurez du réseau.'
+        : `${n} changements sont gardés sur ce téléphone. Rien n’est perdu : ils partiront dès que vous aurez du réseau.`,
+  syncingTitle: 'Envoi en cours…',
+  syncDoneTitle: 'Tout est à jour',
+  syncFailedBody: 'Vos changements sont gardés sur ce téléphone. Réessayez dans un moment.',
+  syncPendingTitle: 'Changements à envoyer',
+  syncPendingBody: (n: number) =>
+    n === 1 ? '1 changement part dans un instant.' : `${n} changements partent dans un instant.`,
+  lastSent: (when: string) => `Dernier envoi : ${when}`,
+  neverSent: 'Dernier envoi : jamais',
+  retry: 'Réessayer',
+  changeNew: 'Nouvel article',
+  changeEdited: 'Modifié',
+  changeQuantity: (from: string, to: string, unit: string | null) =>
+    `${from} → ${to}${unit ? ` ${unit}` : ''}`,
   // PWA
   updateAvailable: 'Une nouvelle version est disponible.',
   reload: 'Recharger',

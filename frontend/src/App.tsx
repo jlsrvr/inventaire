@@ -5,9 +5,12 @@ import { db, getMeta, saveItem, adjustQuantity, type LocalItem } from './db'
 import { normalise } from './lib/normalise'
 import { formatRelativeMoment } from './lib/formatDate'
 import { LAST_SYNCED_AT } from './lib/sync'
+import { syncStatusOf } from './lib/syncStatus'
 import { strings, categoryLabels } from './strings'
 import { CATEGORIES, DEFAULT_CATEGORY, type CategorySlug } from './lib/categories'
 import { Enrol } from './components/Enrol'
+import { SyncButton } from './components/SyncButton'
+import { SyncSheet } from './components/SyncSheet'
 import { ItemForm, type ItemFormValues } from './components/ItemForm'
 import { Card } from './components/ui/Card'
 import { Chip } from './components/ui/Chip'
@@ -43,6 +46,7 @@ function App() {
   const [filter, setFilter] = useState<Filter>('all')
   const [editing, setEditing] = useState<LocalItem | 'new' | null>(null)
   const [reenrolling, setReenrolling] = useState(false)
+  const [sheet, setSheet] = useState<'sync' | null>(null)
 
   const online = useOnline()
   const { syncing, error: syncError, requestSync, syncNow } = useSync(enrolled)
@@ -53,7 +57,17 @@ function App() {
   } = useRegisterSW()
 
   const items = useLiveQuery(() => db.items.toArray(), [], EMPTY_ITEMS) ?? EMPTY_ITEMS
-  const pendingCount = useLiveQuery(() => db.items.where('dirty').equals(1).count(), [], 0) ?? 0
+  // Unsent rows, newest change first: the badge, the banner and the Sync list.
+  const pending =
+    useLiveQuery(
+      async () =>
+        (await db.items.where('dirty').equals(1).toArray()).sort((a, b) =>
+          b.updated_at.localeCompare(a.updated_at),
+        ),
+      [],
+      EMPTY_ITEMS,
+    ) ?? EMPTY_ITEMS
+  const pendingCount = pending.length
   const lastSyncedAt = useLiveQuery(() => getMeta<string>(LAST_SYNCED_AT))
 
   const emptyCount = useMemo(() => items.filter((item) => item.quantity === 0).length, [items])
@@ -112,6 +126,8 @@ function App() {
         ? strings.emptyList
         : strings.categoryEmpty
 
+  const status = syncStatusOf({ online, syncing, error: syncError, pendingCount })
+
   const showNotices = !online || syncError === 'unauthorized' || needRefresh
 
   return (
@@ -132,6 +148,9 @@ function App() {
             </>
           }
         />
+        <div className="flex shrink-0 gap-2">
+          <SyncButton status={status} pendingCount={pendingCount} onClick={() => setSheet('sync')} />
+        </div>
       </PinkHeader>
 
       {showNotices && (
@@ -217,6 +236,20 @@ function App() {
           initial={editing === 'new' ? undefined : editing}
           onSave={handleSave}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {sheet === 'sync' && (
+        <SyncSheet
+          status={status}
+          pending={pending}
+          lastSyncedAt={lastSyncedAt}
+          onRetry={syncNow}
+          onReenrol={() => {
+            setSheet(null)
+            setReenrolling(true)
+          }}
+          onClose={() => setSheet(null)}
         />
       )}
 

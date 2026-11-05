@@ -23,3 +23,9 @@ export function formatRelativeMoment(isoString: string, now: Date = new Date()):
   const day = date.getFullYear() === now.getFullYear() ? dayMonth : dayMonthYear
   return `le ${day.format(date)} ${at}`
 }
+
+/** Shorter form for lists: just « 14:05 » today, otherwise as formatRelativeMoment. */
+export function formatShortMoment(isoString: string, now: Date = new Date()): string {
+  const date = new Date(isoString)
+  return startOfDay(date) === startOfDay(now) ? time.format(date) : formatRelativeMoment(isoString, now)
+}

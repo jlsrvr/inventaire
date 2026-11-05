@@ -80,7 +80,7 @@ async function syncOnce(baseUrl: string): Promise<number> {
     for (const [id, updatedAt] of sent) {
       const local = await db.items.get(id)
       if (local?.dirty === 1 && local.updated_at === updatedAt) {
-        await db.items.update(id, { dirty: 0 })
+        await db.items.update(id, { dirty: 0, synced_quantity: undefined })
       }
     }
 
