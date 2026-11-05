@@ -82,6 +82,22 @@ describe('App', () => {
     expect(sheet).toHaveTextContent(strings.changeNew)
   })
 
+  it('opens the help from the header and from the sync sheet', async () => {
+    await enrolAs('John')
+    render(<App />)
+    const help = await screen.findByRole('button', { name: strings.helpTitle })
+    act(() => help.click())
+    expect(await screen.findByRole('dialog', { name: strings.helpTitle })).toHaveTextContent(
+      strings.helpWarning,
+    )
+    act(() => screen.getByRole('button', { name: strings.close }).click())
+
+    act(() => screen.getByRole('button', { name: /^Synchronisation/ }).click())
+    act(() => screen.getByRole('button', { name: strings.helpLink }).click())
+    expect(await screen.findByRole('dialog', { name: strings.helpTitle })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: strings.syncTitle })).not.toBeInTheDocument()
+  })
+
   it('groups articles by category in fixed order and filters the empty ones', async () => {
     await enrolAs('John')
     await saveItem({ name: 'Eau', category: 'boissons', quantity: 0 }, 'John')

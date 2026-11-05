@@ -11,6 +11,7 @@ import { CATEGORIES, DEFAULT_CATEGORY, type CategorySlug } from './lib/categorie
 import { Enrol } from './components/Enrol'
 import { SyncButton } from './components/SyncButton'
 import { SyncSheet } from './components/SyncSheet'
+import { HelpSheet } from './components/HelpSheet'
 import { ItemForm, type ItemFormValues } from './components/ItemForm'
 import { Card } from './components/ui/Card'
 import { Chip } from './components/ui/Chip'
@@ -46,7 +47,7 @@ function App() {
   const [filter, setFilter] = useState<Filter>('all')
   const [editing, setEditing] = useState<LocalItem | 'new' | null>(null)
   const [reenrolling, setReenrolling] = useState(false)
-  const [sheet, setSheet] = useState<'sync' | null>(null)
+  const [sheet, setSheet] = useState<'sync' | 'help' | null>(null)
 
   const online = useOnline()
   const { syncing, error: syncError, requestSync, syncNow } = useSync(enrolled)
@@ -149,6 +150,14 @@ function App() {
           }
         />
         <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            aria-label={strings.helpTitle}
+            className="flex size-12 items-center justify-center rounded-control bg-primary-dark text-[22px] font-extrabold text-on-primary"
+            onClick={() => setSheet('help')}
+          >
+            ?
+          </button>
           <SyncButton status={status} pendingCount={pendingCount} onClick={() => setSheet('sync')} />
         </div>
       </PinkHeader>
@@ -249,9 +258,12 @@ function App() {
             setSheet(null)
             setReenrolling(true)
           }}
+          onHelp={() => setSheet('help')}
           onClose={() => setSheet(null)}
         />
       )}
+
+      {sheet === 'help' && <HelpSheet onClose={() => setSheet(null)} />}
 
       {reenrolling && (
         <Enrol

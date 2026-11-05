@@ -19,7 +19,7 @@ const cafe: LocalItem = {
 }
 
 function renderSheet(props: Partial<Parameters<typeof SyncSheet>[0]> = {}) {
-  const handlers = { onRetry: vi.fn(), onReenrol: vi.fn(), onClose: vi.fn() }
+  const handlers = { onRetry: vi.fn(), onReenrol: vi.fn(), onHelp: vi.fn(), onClose: vi.fn() }
   render(
     <SyncSheet status="offline" pending={[cafe]} lastSyncedAt={undefined} {...handlers} {...props} />,
   )
@@ -55,5 +55,11 @@ describe('SyncSheet', () => {
     const { onReenrol } = renderSheet({ status: 'unauthorized' })
     fireEvent.click(screen.getByRole('button', { name: strings.reenrolAction }))
     expect(onReenrol).toHaveBeenCalled()
+  })
+
+  it('links to the help', () => {
+    const { onHelp } = renderSheet()
+    fireEvent.click(screen.getByRole('button', { name: strings.helpLink }))
+    expect(onHelp).toHaveBeenCalled()
   })
 })

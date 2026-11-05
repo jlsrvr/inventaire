@@ -30,6 +30,7 @@ export function SyncSheet({
   lastSyncedAt,
   onRetry,
   onReenrol,
+  onHelp,
   onClose,
 }: {
   status: SyncStatus
@@ -38,6 +39,7 @@ export function SyncSheet({
   lastSyncedAt: string | undefined
   onRetry: () => void
   onReenrol: () => void
+  onHelp: () => void
   onClose: () => void
 }) {
   const { title, body } = statusText(status, pending.length)
@@ -91,6 +93,14 @@ export function SyncSheet({
           </ul>
         </section>
       )}
+
+      <button
+        type="button"
+        className="flex min-h-11 items-center self-start text-[15px] font-bold text-primary underline"
+        onClick={onHelp}
+      >
+        {strings.helpLink}
+      </button>
     </Sheet>
   )
 }

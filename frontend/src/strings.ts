@@ -100,6 +100,27 @@ export const strings = {
   changeEdited: 'Modifié',
   changeQuantity: (from: string, to: string, unit: string | null) =>
     `${from} → ${to}${unit ? ` ${unit}` : ''}`,
+  // Aide
+  helpTitle: 'Aide',
+  helpLink: 'Comment ça marche ?',
+  helpHowTitle: 'Comment les changements sont envoyés',
+  helpSteps: [
+    {
+      title: 'Au chalet, sans réseau',
+      body: 'Comptez normalement. Tout est gardé sur votre téléphone, même si vous fermez l’application.',
+    },
+    {
+      title: 'De retour avec du réseau',
+      body: 'Ouvrez l’application. Vos changements partent tout seuls vers les autres téléphones.',
+    },
+    {
+      title: 'C’est envoyé',
+      body: 'L’icône du nuage disparaît des articles et la date « Mis à jour » change.',
+    },
+  ],
+  helpConflictNote: 'Si deux personnes comptent le même article, l’application s’en occupe toute seule.',
+  helpWarning:
+    'Ne supprimez pas l’application avant d’avoir du réseau : les changements pas encore envoyés seraient perdus.',
   // PWA
   updateAvailable: 'Une nouvelle version est disponible.',
   reload: 'Recharger',
