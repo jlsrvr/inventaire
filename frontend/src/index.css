@@ -51,4 +51,10 @@
   body {
     @apply m-0 bg-background font-sans text-text;
   }
+
+  /* Keyboard focus ring in the design's colour instead of the browser's blue. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }

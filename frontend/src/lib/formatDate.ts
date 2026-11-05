@@ -1,12 +1,3 @@
-const formatter = new Intl.DateTimeFormat('fr', {
-  dateStyle: 'short',
-})
-
-/** Formats an ISO updated_at timestamp for display, e.g. "14/09/2026". */
-export function formatUpdatedAt(isoString: string): string {
-  return formatter.format(new Date(isoString))
-}
-
 const time = new Intl.DateTimeFormat('fr', { hour: '2-digit', minute: '2-digit' })
 const weekday = new Intl.DateTimeFormat('fr', { weekday: 'long' })
 const dayMonth = new Intl.DateTimeFormat('fr', { day: 'numeric', month: 'long' })

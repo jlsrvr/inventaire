@@ -8,7 +8,7 @@ import { LAST_SYNCED_AT } from './lib/sync'
 import { strings, categoryLabels } from './strings'
 import { CATEGORIES, DEFAULT_CATEGORY, type CategorySlug } from './lib/categories'
 import { Enrol, ENROL_TITLE_ID } from './components/Enrol'
-import { ItemForm, ITEM_FORM_TITLE_ID, type ItemFormValues } from './components/ItemForm'
+import { ItemForm, type ItemFormValues } from './components/ItemForm'
 import { Dialog } from './components/Dialog'
 import { Card } from './components/ui/Card'
 import { Chip } from './components/ui/Chip'
@@ -214,13 +214,11 @@ function App() {
       </div>
 
       {editing && (
-        <Dialog labelledBy={ITEM_FORM_TITLE_ID} onClose={() => setEditing(null)}>
-          <ItemForm
-            initial={editing === 'new' ? undefined : editing}
-            onSave={handleSave}
-            onCancel={() => setEditing(null)}
-          />
-        </Dialog>
+        <ItemForm
+          initial={editing === 'new' ? undefined : editing}
+          onSave={handleSave}
+          onClose={() => setEditing(null)}
+        />
       )}
 
       {reenrolling && (
