@@ -41,24 +41,77 @@ describe('App', () => {
     await saveItem({ name: 'Café', quantity: 3 }, 'John')
 
     render(<App />)
-    expect(screen.queryByText(strings.enrolTitle)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: strings.enrolSubmit })).not.toBeInTheDocument()
     expect(await screen.findByText('Café')).toBeInTheDocument()
-    expect(screen.queryByText(strings.enrolTitle)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: strings.enrolSubmit })).not.toBeInTheDocument()
   })
 
   it('shows enrolment when not enrolled', async () => {
     render(<App />)
-    expect(await screen.findByText(strings.enrolTitle)).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: strings.enrolSubmit })).toBeInTheDocument()
   })
 
-  it('updates the offline badge when connectivity changes', async () => {
+  it('shows the offline banner with the unsent count only while offline', async () => {
     await enrolAs('John')
+    await saveItem({ name: 'Café', quantity: 3 }, 'John')
     render(<App />)
-    const status = await screen.findByRole('status')
-    expect(status).not.toHaveTextContent(strings.syncOffline)
+    await screen.findByText('Café')
+    expect(screen.queryByText(strings.offlineTitle)).not.toBeInTheDocument()
 
     act(() => setOnline(false))
-    expect(status).toHaveTextContent(strings.syncOffline)
+    expect(await screen.findByText(strings.offlineTitle)).toBeInTheDocument()
+    expect(screen.getByText(strings.offlinePending(1))).toBeInTheDocument()
+
+    act(() => setOnline(true))
+    await waitFor(() => expect(screen.queryByText(strings.offlineTitle)).not.toBeInTheDocument())
+  })
+
+  it('counts unsent changes on the sync button and lists them in the sheet', async () => {
+    syncMock.mockReturnValue(new Promise(() => {})) // keep them unsent
+    await enrolAs('John')
+    await saveItem({ name: 'Café', quantity: 3 }, 'John')
+    act(() => setOnline(false))
+    render(<App />)
+
+    const button = await screen.findByRole('button', {
+      name: strings.syncButton(strings.syncState.offline, 1),
+    })
+    act(() => button.click())
+    const sheet = await screen.findByRole('dialog', { name: strings.syncTitle })
+    expect(sheet).toHaveTextContent(strings.syncOfflineTitle)
+    expect(sheet).toHaveTextContent(strings.changeNew)
+  })
+
+  it('opens the help from the header and from the sync sheet', async () => {
+    await enrolAs('John')
+    render(<App />)
+    const help = await screen.findByRole('button', { name: strings.helpTitle })
+    act(() => help.click())
+    expect(await screen.findByRole('dialog', { name: strings.helpTitle })).toHaveTextContent(
+      strings.helpWarning,
+    )
+    act(() => screen.getByRole('button', { name: strings.close }).click())
+
+    act(() => screen.getByRole('button', { name: /^Synchronisation/ }).click())
+    act(() => screen.getByRole('button', { name: strings.helpLink }).click())
+    expect(await screen.findByRole('dialog', { name: strings.helpTitle })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: strings.syncTitle })).not.toBeInTheDocument()
+  })
+
+  it('groups articles by category in fixed order and filters the empty ones', async () => {
+    await enrolAs('John')
+    await saveItem({ name: 'Eau', category: 'boissons', quantity: 0 }, 'John')
+    await saveItem({ name: 'Riz', category: 'alimentation', quantity: 2 }, 'John')
+    await saveItem({ name: 'Café', category: 'alimentation', quantity: 0 }, 'John')
+    render(<App />)
+
+    const headings = await screen.findAllByRole('heading', { level: 2 })
+    expect(headings.map((h) => h.textContent)).toEqual(['Alimentation · 2', 'Boissons · 1'])
+
+    act(() => screen.getByRole('button', { name: strings.showEmpty(2) }).click())
+    await waitFor(() => expect(screen.queryByText('Riz')).not.toBeInTheDocument())
+    expect(screen.getByText('Café')).toBeInTheDocument()
+    expect(screen.getByText('Eau')).toBeInTheDocument()
   })
 
   it('shows sync failures', async () => {
@@ -87,7 +140,7 @@ describe('App', () => {
     await screen.findByText('Café')
     await waitFor(() => expect(syncMock).toHaveBeenCalledTimes(1))
 
-    act(() => screen.getByRole('button', { name: strings.increase('Café') }).click())
+    act(() => screen.getByRole('button', { name: strings.plusOne('Café') }).click())
     await waitFor(() => expect(syncMock).toHaveBeenCalledTimes(2), { timeout: 3000 })
   })
 })

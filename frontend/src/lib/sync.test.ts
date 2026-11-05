@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { db, getMeta, setMeta, saveItem, type LocalItem } from '../db'
-import { sync, Unauthorized, SYNC_BATCH_SIZE } from './sync'
+import { db, getMeta, setMeta, saveItem, adjustQuantity, type LocalItem } from '../db'
+import { sync, Unauthorized, SYNC_BATCH_SIZE, LAST_SYNCED_AT } from './sync'
 import type { ServerItem, SyncResponse } from '../api/types'
 
 beforeEach(async () => {
@@ -116,6 +116,19 @@ describe('sync', () => {
     expect((await db.items.get(id))?.dirty).toBe(0)
   })
 
+  it('forgets the « before » quantity once the edit is acknowledged', async () => {
+    const id = await saveItem({ name: 'Thé', quantity: 1 }, 'Jane')
+    await db.items.update(id, { dirty: 0, seq: 1 })
+    await adjustQuantity(id, 1, 'Jane')
+    expect((await db.items.get(id))?.synced_quantity).toBe(1)
+
+    mockFetch({ cursor: 5, changes: [], rejected: [] })
+    await sync('http://api.test')
+    const row = (await db.items.get(id))!
+    expect(row.dirty).toBe(0)
+    expect(row).not.toHaveProperty('synced_quantity')
+  })
+
   it('keeps a local edit made while the request was in flight', async () => {
     const id = await saveItem({ name: 'Café', quantity: 3 }, 'John')
     const sentVersion = (await db.items.get(id))!
@@ -140,6 +153,18 @@ describe('sync', () => {
     mockFetch({ cursor: 42, changes: [], rejected: [] })
     await sync('http://api.test')
     expect(await getMeta<number>('cursor')).toBe(42)
+  })
+
+  it('records when a sync last completed, and only on success', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }))
+    await expect(sync('http://api.test')).rejects.toThrow()
+    expect(await getMeta(LAST_SYNCED_AT)).toBeUndefined()
+
+    mockFetch({ cursor: 1, changes: [], rejected: [] })
+    const before = Date.now()
+    await sync('http://api.test')
+    const saved = await getMeta<string>(LAST_SYNCED_AT)
+    expect(Date.parse(saved!)).toBeGreaterThanOrEqual(before)
   })
 
   it('throws Unauthorized on 401 so the UI can ask for the passphrase', async () => {
