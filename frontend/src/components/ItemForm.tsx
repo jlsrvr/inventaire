@@ -1,8 +1,10 @@
 import { useId, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { strings, categoryLabels } from '../strings'
-import { CATEGORIES, DEFAULT_CATEGORY } from '../lib/categories'
+import { CATEGORIES, type CategorySlug } from '../lib/categories'
+import { normalise } from '../lib/normalise'
 import { formatRelativeMoment } from '../lib/formatDate'
-import { roundQuantity, type LocalItem } from '../db'
+import { db, roundQuantity, type LocalItem } from '../db'
 import { parseQuantity, toEditableQuantity } from '../lib/formatQuantity'
 import { Sheet } from './ui/Sheet'
 import { Chip } from './ui/Chip'
@@ -28,13 +30,26 @@ export function ItemForm({
   onClose: () => void
 }) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [category, setCategory] = useState(initial?.category ?? DEFAULT_CATEGORY)
+  // A new article starts with no category: the user must pick one (DESIGN_GAP D5).
+  const [category, setCategory] = useState(initial?.category ?? '')
   const [quantityText, setQuantityText] = useState(toEditableQuantity(initial?.quantity ?? 1))
   const [unit, setUnit] = useState(initial?.unit ?? '')
   const qtyLabelId = useId()
 
   const quantity = parseQuantity(quantityText)
-  const canSave = name.trim() !== '' && quantity !== null
+  const canSave = name.trim() !== '' && category !== '' && quantity !== null
+
+  // Warn (never block) when adding a name that already exists in that category.
+  const searchName = normalise(name.trim())
+  const duplicate = useLiveQuery(
+    async () =>
+      !initial && searchName && category
+        ? (await db.items.where('search_name').equals(searchName).toArray()).find(
+            (item) => item.category === category,
+          )
+        : undefined,
+    [initial, searchName, category],
+  )
 
   function step(delta: number) {
     setQuantityText(toEditableQuantity(roundQuantity((quantity ?? 0) + delta)))
@@ -55,7 +70,13 @@ export function ItemForm({
           </p>
         )}
 
-        <TextField label={strings.name} value={name} onChange={(e) => setName(e.target.value)} required />
+        <TextField
+          label={strings.name}
+          placeholder={initial ? undefined : strings.namePlaceholder}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-1.5 p-0 text-[15px] font-bold">{strings.category}</legend>
@@ -67,6 +88,14 @@ export function ItemForm({
             ))}
           </div>
         </fieldset>
+
+        <p aria-live="polite" className="m-0 empty:hidden">
+          {duplicate && (
+            <span className="block rounded-control bg-tint px-3 py-2 text-sm font-semibold text-primary-dark">
+              {strings.duplicateWarning(duplicate.name, categoryLabels[category as CategorySlug])}
+            </span>
+          )}
+        </p>
 
         <div
           role="group"
@@ -102,13 +131,19 @@ export function ItemForm({
         <TextField
           label={strings.unit}
           hint={strings.optional}
+          placeholder={initial ? undefined : strings.unitPlaceholder}
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
         />
 
-        <PrimaryButton type="submit" className="mt-0.5" disabled={!canSave}>
-          {strings.save}
-        </PrimaryButton>
+        <div className="mt-0.5 flex flex-col gap-2">
+          <PrimaryButton type="submit" disabled={!canSave}>
+            {initial ? strings.save : strings.addSubmit}
+          </PrimaryButton>
+          {!initial && (
+            <p className="m-0 text-center text-sm leading-[1.4] font-medium text-text-muted">{strings.addNote}</p>
+          )}
+        </div>
       </form>
     </Sheet>
   )

@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ItemForm } from './ItemForm'
 import { strings } from '../strings'
-import type { LocalItem } from '../db'
+import { db, saveItem, type LocalItem } from '../db'
 
 const farine: LocalItem = {
   id: 'f',
@@ -63,5 +63,43 @@ describe('ItemForm (Modifier l’article)', () => {
     fireEvent.change(quantityInput(), { target: { value: '2' } })
     fireEvent.change(screen.getByRole('textbox', { name: strings.name }), { target: { value: '  ' } })
     expect(save).toBeDisabled()
+  })
+})
+
+describe('ItemForm (Nouvel article)', () => {
+  beforeEach(async () => {
+    await db.items.clear()
+  })
+
+  it('starts empty with no category and only allows adding once name and category are set', () => {
+    const onSave = vi.fn()
+    render(<ItemForm onSave={onSave} onClose={vi.fn()} />)
+    expect(screen.getByRole('dialog', { name: strings.formAddTitle })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(strings.namePlaceholder)).toHaveValue('')
+    expect(screen.getByText(strings.addNote)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { pressed: true })).not.toBeInTheDocument()
+
+    const add = screen.getByRole('button', { name: strings.addSubmit })
+    fireEvent.change(screen.getByRole('textbox', { name: strings.name }), { target: { value: 'Piles' } })
+    expect(add).toBeDisabled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Outils' }))
+    expect(add).toBeEnabled()
+    fireEvent.click(add)
+    expect(onSave).toHaveBeenCalledWith({ name: 'Piles', category: 'outils', quantity: 1, unit: '' })
+  })
+
+  it('warns, without blocking, when the name already exists in that category', async () => {
+    await saveItem({ name: 'Café', category: 'alimentation', quantity: 2 }, 'Jules')
+    render(<ItemForm onSave={vi.fn()} onClose={vi.fn()} />)
+
+    fireEvent.change(screen.getByRole('textbox', { name: strings.name }), { target: { value: ' CAFE ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Alimentation' }))
+    const warning = strings.duplicateWarning('Café', 'Alimentation')
+    expect(await screen.findByText(warning)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: strings.addSubmit })).toBeEnabled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Boissons' }))
+    await waitFor(() => expect(screen.queryByText(warning)).not.toBeInTheDocument())
   })
 })

@@ -41,6 +41,11 @@ export const strings = {
   stepDown: 'Moins un',
   stepUp: 'Plus un',
   save: 'Enregistrer',
+  namePlaceholder: 'Ex. : café, piles, éponges',
+  unitPlaceholder: 'Ex. : kg, bouteilles, paquets',
+  addSubmit: 'Ajouter à l’inventaire',
+  addNote: 'Gardé sur ce téléphone, puis envoyé aux autres dès qu’il y a du réseau.',
+  duplicateWarning: (name: string, category: string) => `« ${name} » existe déjà dans ${category}.`,
   lastEdited: (when: string, who: string) => `Modifié ${when} par ${who}`,
   // Sync
   syncing: 'Synchronisation…',
