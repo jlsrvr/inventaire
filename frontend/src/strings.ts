@@ -45,6 +45,17 @@ export const strings = {
   syncError: 'Échec de la synchronisation',
   syncUnauthorized: 'Synchronisation suspendue : mot de passe à ressaisir.',
   reenrolAction: 'Ressaisir',
+  // Shared components (design)
+  close: 'Fermer',
+  pending: 'Pas encore envoyé',
+  empty: 'Épuisé',
+  minusOne: (name: string) => `${name} : moins un`,
+  plusOne: (name: string) => `${name} : plus un`,
+  offlineTitle: 'Pas de réseau, tout marche quand même',
+  offlinePending: (n: number) =>
+    n === 1
+      ? '1 changement est gardé sur ce téléphone. Il partira dès que vous aurez du réseau.'
+      : `${n} changements sont gardés sur ce téléphone. Ils partiront dès que vous aurez du réseau.`,
   // PWA
   updateAvailable: 'Une nouvelle version est disponible.',
   reload: 'Recharger',

@@ -18,6 +18,7 @@
   --color-text: #0a0a0a; /* body text; also offline banner background, dark + button */
   --color-text-muted: #4b5563; /* units, hints, dates */
   --color-on-dark-muted: #b5b5b5; /* secondary text in the black banner */
+  --color-on-dark-accent: #f9a8d4; /* icon in the black offline banner (design files, not in §7) */
   --color-outline: #b0688c; /* input and chip borders (≥3:1 contrast, keep it) */
   --color-divider: #f8edf3; /* lines between rows */
   --color-divider-strong: #f3d0e2; /* bottom bar top line, Sync list outline (design files, not in §7) */
