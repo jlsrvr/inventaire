@@ -16,7 +16,7 @@ export function ItemList({
   showCategory?: boolean
 }) {
   if (items.length === 0) {
-    return <p className="mt-8 text-center text-slate-500">{strings.noResults}</p>
+    return <p className="mt-8 text-center text-text-muted">{strings.noResults}</p>
   }
 
   return (
@@ -27,7 +27,7 @@ export function ItemList({
           className={
             item.quantity === 0
               ? 'flex items-center justify-between gap-2 rounded-lg border border-[#fde68a] border-l-4 border-l-amber-500 bg-amber-100 px-3 py-2'
-              : 'flex items-center justify-between gap-2 rounded-lg border border-[#f1e2cc] border-l-4 border-l-accent-soft bg-white px-3 py-2'
+              : 'flex items-center justify-between gap-2 rounded-lg border border-divider border-l-4 border-l-tint bg-surface px-3 py-2'
           }
         >
           <button
@@ -43,7 +43,7 @@ export function ItemList({
                   item.category}
               </span>
             )}
-            <span className="text-[0.7rem] text-slate-400">
+            <span className="text-[0.7rem] text-text-muted">
               {strings.updatedOn} {formatUpdatedAt(item.updated_at)} {strings.updatedBy}{' '}
               {item.updated_by}
             </span>
@@ -53,7 +53,7 @@ export function ItemList({
               <button
                 type="button"
                 aria-label={strings.decrease(item.name)}
-                className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-8 w-8 rounded-full border border-tint bg-tint p-0 text-lg font-bold text-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => onAdjust(item.id, -1)}
                 disabled={item.quantity === 0}
               >
@@ -65,7 +65,7 @@ export function ItemList({
               <button
                 type="button"
                 aria-label={strings.increase(item.name)}
-                className="h-8 w-8 rounded-full border border-accent-soft bg-accent-soft p-0 text-lg font-bold text-accent-hover"
+                className="h-8 w-8 rounded-full border border-tint bg-tint p-0 text-lg font-bold text-primary-dark"
                 onClick={() => onAdjust(item.id, 1)}
               >
                 +

@@ -16,8 +16,8 @@ export default defineConfig({
         name: 'Inventaire',
         short_name: 'Inventaire',
         description: "Inventaire hors ligne pour la maison de vacances",
-        theme_color: '#1e293b',
-        background_color: '#ffffff',
+        theme_color: '#be185d',
+        background_color: '#fdf2f8',
         display: 'standalone',
         start_url: '/',
         icons: [

@@ -45,17 +45,17 @@ export function Enrol({
   }
 
   const fieldClasses =
-    'rounded-md border border-[#e7cba9] bg-white p-2 text-slate-900 focus:outline focus:outline-2 focus:outline-accent focus:outline-offset-1'
+    'rounded-md border border-outline bg-surface p-2 text-text focus:outline focus:outline-2 focus:outline-primary focus:outline-offset-1'
 
   return (
     <div
       className={
         reenrol
-          ? 'w-full max-w-[480px] rounded-t-xl border-t-4 border-accent bg-white p-4'
+          ? 'w-full max-w-[480px] rounded-t-xl border-t-4 border-primary bg-surface p-4'
           : 'mx-auto mt-12 max-w-[360px] p-4'
       }
     >
-      <h1 id={ENROL_TITLE_ID} className="text-accent-hover">
+      <h1 id={ENROL_TITLE_ID} className="text-primary-dark">
         {reenrol ? strings.reenrolTitle : strings.enrolTitle}
       </h1>
       <p>{reenrol ? strings.reenrolIntro : strings.enrolIntro}</p>
@@ -81,10 +81,10 @@ export function Enrol({
             autoFocus={reenrol}
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <button
           type="submit"
-          className="rounded-md border border-accent bg-accent px-3 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:border-[#e2b78e] disabled:bg-[#e2b78e]"
+          className="rounded-md border border-primary bg-primary px-3 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:border-primary/40 disabled:bg-primary/40"
           disabled={submitting || !firstName || !passphrase}
         >
           {strings.enrolSubmit}

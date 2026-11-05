@@ -64,7 +64,7 @@ export function Dialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby={labelledBy}
-      className="fixed inset-0 flex items-end justify-center bg-black/40"
+      className="fixed inset-0 flex items-end justify-center bg-text/50"
     >
       {children}
     </div>

@@ -84,8 +84,8 @@ function App() {
   ]
 
   const tabBase = 'shrink-0 mr-5 -mb-0.5 border-b-2 px-1 pb-2 font-semibold whitespace-nowrap'
-  const tabInactive = 'border-transparent text-[#94836c]'
-  const tabActive = 'border-accent text-accent-hover'
+  const tabInactive = 'border-transparent text-text-muted'
+  const tabActive = 'border-primary text-primary-dark'
 
   const emptyMessage = search.trim()
     ? strings.noResults
@@ -98,8 +98,8 @@ function App() {
   return (
     <div className="mx-auto max-w-[640px] p-4">
       <header className="mb-4 flex items-baseline gap-3">
-        <h1 className="text-xl font-semibold text-accent-hover">{strings.appName}</h1>
-        <span role="status" className="text-xs text-slate-500">
+        <h1 className="text-xl font-semibold text-primary-dark">{strings.appName}</h1>
+        <span role="status" className="text-xs text-text-muted">
           {!online
             ? strings.syncOffline
             : syncing
@@ -111,10 +111,10 @@ function App() {
       </header>
 
       {syncError === 'unauthorized' && (
-        <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-amber-100 px-3 py-2 text-amber-900">
+        <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-tint px-3 py-2 text-primary-dark">
           <span>{strings.syncUnauthorized}</span>
           <button
-            className="shrink-0 rounded-md bg-white px-3 py-1.5 font-semibold text-accent-hover"
+            className="shrink-0 rounded-md bg-surface px-3 py-1.5 font-semibold text-primary-dark"
             onClick={() => setReenrolling(true)}
           >
             {strings.reenrolAction}
@@ -123,10 +123,10 @@ function App() {
       )}
 
       {needRefresh && (
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-accent px-3 py-2 text-white">
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-on-primary">
           <span>{strings.updateAvailable}</span>
           <button
-            className="rounded-md bg-white px-3 py-1.5 font-semibold text-accent-hover"
+            className="rounded-md bg-surface px-3 py-1.5 font-semibold text-primary-dark"
             onClick={() => updateServiceWorker(true)}
           >
             {strings.reload}
@@ -138,13 +138,13 @@ function App() {
         <input
           type="search"
           aria-label={strings.searchLabel}
-          className="min-w-[150px] flex-1 rounded-md border border-[#e7cba9] bg-white p-2 text-slate-900 focus:outline focus:outline-2 focus:outline-accent focus:outline-offset-1"
+          className="min-w-[150px] flex-1 rounded-md border border-outline bg-surface p-2 text-text focus:outline focus:outline-2 focus:outline-primary focus:outline-offset-1"
           placeholder={strings.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <button
-          className="rounded-md border border-accent bg-accent px-3 py-2 font-semibold text-white hover:border-accent-hover hover:bg-accent-hover"
+          className="rounded-md border border-primary bg-primary px-3 py-2 font-semibold text-on-primary hover:border-primary-dark hover:bg-primary-dark"
           onClick={() => setEditing('new')}
         >
           {strings.addItem}
@@ -152,7 +152,7 @@ function App() {
       </div>
 
       <div
-        className="mb-4 flex overflow-x-auto border-b-2 border-[#f1e2cc]"
+        className="mb-4 flex overflow-x-auto border-b-2 border-divider"
         role="tablist"
       >
         {tabs.map((tab) => (
@@ -169,7 +169,7 @@ function App() {
       </div>
 
       {visible.length === 0 ? (
-        <p className="mt-8 text-center text-slate-500">{emptyMessage}</p>
+        <p className="mt-8 text-center text-text-muted">{emptyMessage}</p>
       ) : (
         <ItemList
           items={visible}

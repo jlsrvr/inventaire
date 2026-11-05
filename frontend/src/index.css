@@ -1,19 +1,53 @@
 @import 'tailwindcss';
 
+/* Design tokens: design-handoff/SPEC.md §7 and design/*.dc.html.
+   Each token becomes Tailwind utilities (bg-primary, text-text-muted,
+   rounded-card, shadow-button…). Use these, never raw hex values. */
 @theme {
-  --color-accent: #c2410c;
-  --color-accent-hover: #9a3412;
-  --color-accent-soft: #ffedd5;
+  /* System font on purpose (DESIGN_GAP.md D6): nothing to download, works
+     offline. San Francisco on iPhone, Roboto on Android. */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-primary: #be185d; /* headers, main buttons, + buttons, selected chips, pending icon */
+  --color-primary-dark: #9d174d; /* « ? » button, text on light pink */
+  --color-on-primary: #ffffff; /* text on primary */
+  --color-on-primary-muted: #ffe4f1; /* secondary text on primary */
+  --color-tint: #fce7f3; /* light pink fills */
+  --color-background: #fdf2f8; /* page background */
+  --color-surface: #ffffff; /* cards, inputs, sheets */
+  --color-text: #0a0a0a; /* body text; also offline banner background, dark + button */
+  --color-text-muted: #4b5563; /* units, hints, dates */
+  --color-on-dark-muted: #b5b5b5; /* secondary text in the black banner */
+  --color-outline: #b0688c; /* input and chip borders (≥3:1 contrast, keep it) */
+  --color-divider: #f8edf3; /* lines between rows */
+  --color-divider-strong: #f3d0e2; /* bottom bar top line, Sync list outline (design files, not in §7) */
+  --color-handle: #e3c7d6; /* sheet grab handle (design files, not in §7) */
+  --color-empty: #1d4ed8; /* « Épuisé » tag, zero quantities */
+  --color-synced: #16a34a; /* optional success state */
+  --color-error: #b91c1c; /* inline form errors (not in the design; red kept for meaning) */
+
+  /* Radii */
+  --radius-control: 12px; /* rows, inputs, buttons, chips */
+  --radius-card: 16px; /* cards, primary button */
+  --radius-block: 20px; /* big blocks (login card, sync status card) */
+  --radius-sheet: 28px; /* header bottom corners, sheet top corners */
+
+  /* Shadows */
+  --shadow-button: 0 10px 24px rgba(190, 24, 93, 0.4); /* primary button */
+  --shadow-card: 0 10px 30px rgba(190, 24, 93, 0.14); /* cards, offline banner */
+  --shadow-sheet: 0 -10px 40px rgba(0, 0, 0, 0.25); /* slide-up sheet */
+  --shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.18); /* white sync button on the pink header */
+  --shadow-logo: 0 8px 20px rgba(0, 0, 0, 0.18); /* house icon on the login header */
 }
 
 :root {
-  /* The whole app is a hardcoded light palette with no dark variant, so
-     don't opt form controls into dark-mode UA styling. */
+  /* The whole app is a light palette with no dark variant, so don't opt form
+     controls into dark-mode UA styling. */
   color-scheme: light;
 }
 
 @layer base {
   body {
-    @apply m-0 bg-[#fdf6ec] font-sans text-slate-900;
+    @apply m-0 bg-background font-sans text-text;
   }
 }
