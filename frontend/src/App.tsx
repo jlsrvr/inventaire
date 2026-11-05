@@ -3,18 +3,33 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { db, getMeta, saveItem, adjustQuantity, type LocalItem } from './db'
 import { normalise } from './lib/normalise'
+import { formatRelativeMoment } from './lib/formatDate'
+import { LAST_SYNCED_AT } from './lib/sync'
 import { strings, categoryLabels } from './strings'
-import { CATEGORIES, type CategorySlug } from './lib/categories'
+import { CATEGORIES, DEFAULT_CATEGORY, type CategorySlug } from './lib/categories'
 import { Enrol, ENROL_TITLE_ID } from './components/Enrol'
 import { ItemForm, ITEM_FORM_TITLE_ID, type ItemFormValues } from './components/ItemForm'
-import { ItemList } from './components/ItemList'
 import { Dialog } from './components/Dialog'
+import { Card } from './components/ui/Card'
+import { Chip } from './components/ui/Chip'
+import { ItemRow } from './components/ui/ItemRow'
+import { OfflineBanner } from './components/ui/OfflineBanner'
+import { HeaderTitle, PinkHeader } from './components/ui/PinkHeader'
+import { PrimaryButton } from './components/ui/PrimaryButton'
+import { PlusIcon, SearchIcon } from './components/ui/icons'
 import { useOnline } from './hooks/useOnline'
 import { useSync } from './hooks/useSync'
 
-type Filter = 'all' | 'shopping' | CategorySlug
+type Filter = 'all' | 'empty' | CategorySlug
 
 const EMPTY_ITEMS: LocalItem[] = []
+
+/** Items whose category isn't a known slug are shown with « Autres ». */
+function groupOf(item: LocalItem): CategorySlug {
+  return (CATEGORIES as readonly string[]).includes(item.category)
+    ? (item.category as CategorySlug)
+    : DEFAULT_CATEGORY
+}
 
 function App() {
   // `undefined` while IndexedDB is still loading — distinct from "not enrolled",
@@ -39,16 +54,23 @@ function App() {
   } = useRegisterSW()
 
   const items = useLiveQuery(() => db.items.toArray(), [], EMPTY_ITEMS) ?? EMPTY_ITEMS
+  const pendingCount = useLiveQuery(() => db.items.where('dirty').equals(1).count(), [], 0) ?? 0
+  const lastSyncedAt = useLiveQuery(() => getMeta<string>(LAST_SYNCED_AT))
 
-  const visible = useMemo(() => {
+  const emptyCount = useMemo(() => items.filter((item) => item.quantity === 0).length, [items])
+
+  const groups = useMemo(() => {
     const term = normalise(search.trim())
-    let filtered = items.filter((item) => item.search_name.includes(term))
-    if (filter === 'shopping') {
-      filtered = filtered.filter((item) => item.quantity === 0)
-    } else if (filter !== 'all') {
-      filtered = filtered.filter((item) => item.category === filter)
-    }
-    return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+    const visible = items
+      .filter((item) => item.search_name.includes(term))
+      .filter((item) =>
+        filter === 'all' ? true : filter === 'empty' ? item.quantity === 0 : groupOf(item) === filter,
+      )
+      .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+    return CATEGORIES.map((slug) => ({
+      slug,
+      items: visible.filter((item) => groupOf(item) === slug),
+    })).filter((group) => group.items.length > 0)
   }, [items, search, filter])
 
   if (me === undefined) return null
@@ -77,107 +99,119 @@ function App() {
     requestSync()
   }
 
-  const tabs: { key: Filter; label: string }[] = [
+  const chips: { key: Filter; label: string }[] = [
     { key: 'all', label: strings.showAll },
-    { key: 'shopping', label: strings.showShoppingList },
+    { key: 'empty', label: strings.showEmpty(emptyCount) },
     ...CATEGORIES.map((slug) => ({ key: slug, label: categoryLabels[slug] })),
   ]
 
-  const tabBase = 'shrink-0 mr-5 -mb-0.5 border-b-2 px-1 pb-2 font-semibold whitespace-nowrap'
-  const tabInactive = 'border-transparent text-text-muted'
-  const tabActive = 'border-primary text-primary-dark'
-
   const emptyMessage = search.trim()
     ? strings.noResults
-    : filter === 'shopping'
+    : filter === 'empty'
       ? strings.shoppingListEmpty
       : filter === 'all'
         ? strings.emptyList
         : strings.categoryEmpty
 
+  const showNotices = !online || syncError === 'unauthorized' || needRefresh
+
   return (
-    <div className="mx-auto max-w-[640px] p-4">
-      <header className="mb-4 flex items-baseline gap-3">
-        <h1 className="text-xl font-semibold text-primary-dark">{strings.appName}</h1>
-        <span role="status" className="text-xs text-text-muted">
-          {!online
-            ? strings.syncOffline
-            : syncing
-              ? strings.syncing
-              : syncError === 'failed'
-                ? strings.syncError
-                : ''}
-        </span>
-      </header>
-
-      {syncError === 'unauthorized' && (
-        <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-tint px-3 py-2 text-primary-dark">
-          <span>{strings.syncUnauthorized}</span>
-          <button
-            className="shrink-0 rounded-md bg-surface px-3 py-1.5 font-semibold text-primary-dark"
-            onClick={() => setReenrolling(true)}
-          >
-            {strings.reenrolAction}
-          </button>
-        </div>
-      )}
-
-      {needRefresh && (
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-on-primary">
-          <span>{strings.updateAvailable}</span>
-          <button
-            className="rounded-md bg-surface px-3 py-1.5 font-semibold text-primary-dark"
-            onClick={() => updateServiceWorker(true)}
-          >
-            {strings.reload}
-          </button>
-        </div>
-      )}
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        <input
-          type="search"
-          aria-label={strings.searchLabel}
-          className="min-w-[150px] flex-1 rounded-md border border-outline bg-surface p-2 text-text focus:outline focus:outline-2 focus:outline-primary focus:outline-offset-1"
-          placeholder={strings.searchPlaceholder}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+    <div className="mx-auto flex min-h-dvh max-w-[640px] flex-col">
+      <PinkHeader>
+        <HeaderTitle
+          title={strings.appName}
+          subtitle={
+            <>
+              <span className="text-sm font-medium text-on-primary-muted">
+                {lastSyncedAt
+                  ? strings.lastSynced(formatRelativeMoment(lastSyncedAt))
+                  : strings.neverSynced}
+              </span>
+              <span role="status" className="text-sm font-medium text-on-primary-muted empty:hidden">
+                {online && syncing ? strings.syncing : online && syncError === 'failed' ? strings.syncError : ''}
+              </span>
+            </>
+          }
         />
-        <button
-          className="rounded-md border border-primary bg-primary px-3 py-2 font-semibold text-on-primary hover:border-primary-dark hover:bg-primary-dark"
-          onClick={() => setEditing('new')}
-        >
+      </PinkHeader>
+
+      {showNotices && (
+        <div className="relative mx-5 -mt-[22px] flex flex-col gap-2">
+          {!online && <OfflineBanner pendingCount={pendingCount} />}
+          {syncError === 'unauthorized' && (
+            <Card className="flex-row items-center justify-between gap-3 px-3.5 py-3">
+              <span className="text-[15px] font-semibold text-primary-dark">{strings.syncUnauthorized}</span>
+              <button
+                className="h-11 shrink-0 rounded-control bg-primary px-4 font-bold text-on-primary"
+                onClick={() => setReenrolling(true)}
+              >
+                {strings.reenrolAction}
+              </button>
+            </Card>
+          )}
+          {needRefresh && (
+            <Card className="flex-row items-center justify-between gap-3 px-3.5 py-3">
+              <span className="text-[15px] font-semibold">{strings.updateAvailable}</span>
+              <button
+                className="h-11 shrink-0 rounded-control bg-primary px-4 font-bold text-on-primary"
+                onClick={() => updateServiceWorker(true)}
+              >
+                {strings.reload}
+              </button>
+            </Card>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 pt-4 pb-2">
+        <label className="mx-5 flex h-[52px] items-center gap-2.5 rounded-control bg-surface px-3.5 inset-ring inset-ring-outline focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-primary">
+          <SearchIcon size={20} className="shrink-0" />
+          <span className="sr-only">{strings.searchLabel}</span>
+          <input
+            type="search"
+            className="min-w-0 flex-1 bg-transparent text-base font-medium text-text outline-none"
+            placeholder={strings.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+        <div role="group" aria-label={strings.filterLabel} className="flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {chips.map((chip) => (
+            <Chip key={chip.key} pressed={filter === chip.key} onClick={() => setFilter(chip.key)}>
+              {chip.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <main className="flex flex-1 flex-col gap-4 px-5 pt-1 pb-4">
+        {groups.length === 0 ? (
+          <p className="mt-8 text-center text-text-muted">{emptyMessage}</p>
+        ) : (
+          groups.map((group) => (
+            <section key={group.slug} className="flex flex-col gap-2" aria-labelledby={`group-${group.slug}`}>
+              <h2 id={`group-${group.slug}`} className="m-0 text-[17px] font-extrabold">
+                {categoryLabels[group.slug]}{' '}
+                <span className="font-medium text-text-muted">· {group.items.length}</span>
+              </h2>
+              <Card>
+                <ul className="m-0 list-none p-0">
+                  {group.items.map((item) => (
+                    <ItemRow key={item.id} item={item} onAdjust={handleAdjust} onEdit={setEditing} />
+                  ))}
+                </ul>
+              </Card>
+            </section>
+          ))
+        )}
+      </main>
+
+      <div className="sticky bottom-0 border-t border-divider-strong bg-background px-5 pt-3.5 pb-[calc(28px+env(safe-area-inset-bottom))]">
+        <PrimaryButton onClick={() => setEditing('new')}>
+          <PlusIcon size={22} />
           {strings.addItem}
-        </button>
+        </PrimaryButton>
       </div>
-
-      <div
-        className="mb-4 flex overflow-x-auto border-b-2 border-divider"
-        role="tablist"
-      >
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            role="tab"
-            aria-selected={filter === tab.key}
-            className={`${tabBase} ${filter === tab.key ? tabActive : tabInactive}`}
-            onClick={() => setFilter(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {visible.length === 0 ? (
-        <p className="mt-8 text-center text-text-muted">{emptyMessage}</p>
-      ) : (
-        <ItemList
-          items={visible}
-          onAdjust={handleAdjust}
-          onEdit={setEditing}
-          showCategory={filter === 'all' || filter === 'shopping'}
-        />
-      )}
 
       {editing && (
         <Dialog labelledBy={ITEM_FORM_TITLE_ID} onClose={() => setEditing(null)}>

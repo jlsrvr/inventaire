@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db, getMeta, setMeta, saveItem, type LocalItem } from '../db'
-import { sync, Unauthorized, SYNC_BATCH_SIZE } from './sync'
+import { sync, Unauthorized, SYNC_BATCH_SIZE, LAST_SYNCED_AT } from './sync'
 import type { ServerItem, SyncResponse } from '../api/types'
 
 beforeEach(async () => {
@@ -140,6 +140,18 @@ describe('sync', () => {
     mockFetch({ cursor: 42, changes: [], rejected: [] })
     await sync('http://api.test')
     expect(await getMeta<number>('cursor')).toBe(42)
+  })
+
+  it('records when a sync last completed, and only on success', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }))
+    await expect(sync('http://api.test')).rejects.toThrow()
+    expect(await getMeta(LAST_SYNCED_AT)).toBeUndefined()
+
+    mockFetch({ cursor: 1, changes: [], rejected: [] })
+    const before = Date.now()
+    await sync('http://api.test')
+    const saved = await getMeta<string>(LAST_SYNCED_AT)
+    expect(Date.parse(saved!)).toBeGreaterThanOrEqual(before)
   })
 
   it('throws Unauthorized on 401 so the UI can ask for the passphrase', async () => {
