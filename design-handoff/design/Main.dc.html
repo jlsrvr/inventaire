@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Inventaire</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FDF2F8; color: #0A0A0A; font-family: Geist, system-ui, -apple-system, 'Segoe UI', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="padding: 28px 20px 40px; background: #BE185D; color: #FFFFFF; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 15px; font-weight: 600; color: #FFE4F1">Le Jadis</span>
+      <h1 style="margin: 0; font-size: 38px; line-height: 1; font-weight: 800; letter-spacing: -0.03em">Inventaire</h1>
+      <span style="font-size: 14px; font-weight: 500; color: #FFE4F1">Mis à jour aujourd’hui à 14:05</span>
+    </div>
+    <div style="display: flex; gap: 8px; flex: none">
+    <a href="Help.dc.html" aria-label="Aide" style="width: 48px; height: 48px; border-radius: 12px; background: #9D174D; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 22px; font-weight: 800">?</a>
+    <a href="Sync.dc.html" aria-label="Synchronisation : hors ligne, 3 changements en attente" style="width: 48px; height: 48px; border-radius: 12px; background: #FFFFFF; color: #0A0A0A; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); display: flex; align-items: center; justify-content: center; position: relative; text-decoration: none; flex: none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M8.5 6.3A6 6 0 0 1 17.7 10H18a4 4 0 0 1 2.2 7.3"></path><path d="M6 9a5 5 0 0 0 0.5 9H17"></path></svg>
+      <span style="position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; border-radius: 999px; background: #1D4ED8; color: #FFFFFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">3</span>
+    </a>
+    </div>
+  </header>
+
+  <div style="margin: -22px 20px 0; position: relative; box-shadow: 0 10px 30px rgba(190, 24, 93, 0.14); background: #0A0A0A; border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 15px; font-weight: 700; color: #FFFFFF">Pas de réseau, tout marche quand même</span>
+      <span style="font-size: 14px; font-weight: 500; line-height: 1.35; color: #B5B5B5">3 changements sont gardés sur ce téléphone. Ils partiront dès que vous aurez du réseau.</span>
+    </div>
+  </div>
+
+  <div style="padding: 16px 0 8px; display: flex; flex-direction: column; gap: 12px">
+    <label style="margin: 0 20px; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 14px; background: #FFFFFF; border-radius: 12px; box-shadow: inset 0 0 0 1px #B0688C">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher un article</span>
+      <input type="search" placeholder="Rechercher un article" style="flex: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; font-weight: 500; color: #0A0A0A; min-width: 0">
+    </label>
+    <div style="display: flex; gap: 8px; overflow-x: auto; padding: 0 20px">
+      <sc-for list="{{chips}}" as="chip" hint-placeholder-count="5">
+        <button type="button" aria-pressed="{{chip.pressed}}" style="flex: none; height: 40px; padding: 0 14px; border: 0; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; {{chip.style}}">{{chip.label}}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="flex: 1; overflow: hidden; padding: 4px 20px 0; display: flex; flex-direction: column; gap: 16px">
+    <sc-for list="{{groups}}" as="group" hint-placeholder-count="2">
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <h2 style="margin: 0; font-size: 17px; font-weight: 800">{{group.name}} <span style="font-weight: 500; color: #4B5563">· {{group.count}}</span></h2>
+        <div style="background: #FFFFFF; border-radius: 16px; box-shadow: 0 10px 30px rgba(190, 24, 93, 0.14); display: flex; flex-direction: column">
+          <sc-for list="{{group.items}}" as="item" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 10px; min-height: 68px; padding: 8px 12px 8px 16px; border-bottom: {{item.divider}}">
+              <a href="Item.dc.html" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; color: #0A0A0A; text-decoration: none">
+                <div style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                  <span style="font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{item.name}}</span>
+                  <sc-if value="{{item.pending}}" hint-placeholder-val="{{ false }}">
+                    <span title="Pas encore envoyé" style="flex: none; width: 24px; height: 24px; border-radius: 999px; background: #BE185D; display: flex; align-items: center; justify-content: center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Pas encore envoyé"><path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5"></path><path d="M12 20v-7"></path><path d="M9 15.5l3-3 3 3"></path></svg>
+                    </span>
+                  </sc-if>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center">
+                  <span style="font-size: 14px; font-weight: 500; color: #4B5563">{{item.unit}}</span>
+                  <sc-if value="{{item.empty}}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: #1D4ED8; color: #FFFFFF">Épuisé</span>
+                  </sc-if>
+                </div>
+              </a>
+              <div style="display: flex; align-items: center; gap: 4px; flex: none">
+                <button type="button" aria-label="{{item.name}} : moins un" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #B0688C; color: #BE185D; display: flex; align-items: center; justify-content: center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                </button>
+                <span style="min-width: 36px; text-align: center; font-size: 22px; font-weight: 800; color: {{item.qtyColor}}">{{item.qty}}</span>
+                <button type="button" aria-label="{{item.name}} : plus un" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #BE185D; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+
+  <div style="padding: 14px 20px 28px; background: #FDF2F8; box-shadow: inset 0 1px 0 #F3D0E2">
+    <a href="Add.dc.html" style="height: 58px; border-radius: 16px; background: #BE185D; color: #FFFFFF; box-shadow: 0 10px 24px rgba(190, 24, 93, 0.4); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 18px; font-weight: 800">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      Ajouter un article
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const on = 'background: #BE185D; color: #FFFFFF';
+    const off = 'background: #FFFFFF; color: #0A0A0A; box-shadow: inset 0 0 0 1px #B0688C';
+    const chips = [
+      { label: 'Tout', style: on, pressed: 'true' },
+      { label: 'Épuisés · 2', style: off, pressed: 'false' },
+      { label: 'Alimentation', style: off, pressed: 'false' },
+      { label: 'Boissons', style: off, pressed: 'false' },
+      { label: 'Entretien', style: off, pressed: 'false' },
+      { label: 'Hygiène', style: off, pressed: 'false' },
+      { label: 'Outils', style: off, pressed: 'false' },
+      { label: 'Autres', style: off, pressed: 'false' }
+    ];
+    const raw = [
+      { name: 'Alimentation', items: [
+        { name: 'Café', unit: 'paquets', qty: 0, pending: true },
+        { name: 'Pâtes', unit: 'paquets', qty: 6 },
+        { name: 'Riz', unit: 'kg', qty: 2 },
+        { name: 'Huile d’olive', unit: 'bouteilles', qty: 1 }
+      ]},
+      { name: 'Boissons', items: [
+        { name: 'Eau', unit: 'packs', qty: 3, pending: true },
+        { name: 'Jus d’orange', unit: 'bouteilles', qty: 0 }
+      ]}
+    ];
+    const groups = raw.map(g => ({
+      name: g.name,
+      count: g.items.length,
+      items: g.items.map((it, i) => ({
+        ...it,
+        pending: !!it.pending,
+        empty: it.qty === 0,
+        qtyColor: it.qty === 0 ? '#1D4ED8' : '#0A0A0A',
+        divider: i === g.items.length - 1 ? '0' : '1px solid #F8EDF3'
+      }))
+    }));
+    return { chips, groups };
+  }
+}
+</script>
+</body>
+</html>

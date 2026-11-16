@@ -119,3 +119,29 @@ describe('search_name index', () => {
     expect(results[0].name).toBe('Café')
   })
 })
+
+describe('synced_quantity (the « before » of an unsent change)', () => {
+  /** A row as it is after a sync: clean, with a server seq. */
+  async function syncedRow(quantity: number): Promise<string> {
+    const id = await saveItem({ name: 'Café', quantity }, 'Jules')
+    await db.items.update(id, { dirty: 0, seq: 1, synced_quantity: undefined })
+    return id
+  }
+
+  it('is unset on a brand-new article', async () => {
+    const id = await saveItem({ name: 'Café', quantity: 2 }, 'Jules')
+    expect((await db.items.get(id))!.synced_quantity).toBeUndefined()
+  })
+
+  it('remembers the synced quantity across several unsent edits', async () => {
+    const id = await syncedRow(2)
+    await adjustQuantity(id, -1, 'Jules')
+    await adjustQuantity(id, -1, 'Jules')
+    const row = (await db.items.get(id))!
+    expect(row.quantity).toBe(0)
+    expect(row.synced_quantity).toBe(2)
+
+    await saveItem({ id, name: 'Café moulu', quantity: 5 }, 'Jules', row)
+    expect((await db.items.get(id))!.synced_quantity).toBe(2)
+  })
+})

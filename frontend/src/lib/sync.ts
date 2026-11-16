@@ -6,6 +6,9 @@ import { API_URL } from './api'
 /** The server refused our token — the user must re-enter the passphrase. */
 export class Unauthorized extends Error {}
 
+/** Meta key: ISO time of the last sync that completed without error. */
+export const LAST_SYNCED_AT = 'lastSyncedAt'
+
 /** Matches the server's MAX_CHANGES_PER_SYNC. Bigger outboxes go in rounds. */
 export const SYNC_BATCH_SIZE = 500
 
@@ -77,7 +80,7 @@ async function syncOnce(baseUrl: string): Promise<number> {
     for (const [id, updatedAt] of sent) {
       const local = await db.items.get(id)
       if (local?.dirty === 1 && local.updated_at === updatedAt) {
-        await db.items.update(id, { dirty: 0 })
+        await db.items.update(id, { dirty: 0, synced_quantity: undefined })
       }
     }
 
@@ -113,6 +116,8 @@ export function sync(baseUrl: string = API_URL): Promise<void> {
         rerun = false
         await syncAll(baseUrl)
       } while (rerun)
+      // Only once everything went through: shown as « Mis à jour … ».
+      await setMeta(LAST_SYNCED_AT, new Date().toISOString())
     } finally {
       inFlight = null
       rerun = false

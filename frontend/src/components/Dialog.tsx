@@ -64,7 +64,11 @@ export function Dialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby={labelledBy}
-      className="fixed inset-0 flex items-end justify-center bg-black/40"
+      className="fixed inset-0 flex items-end justify-center bg-text/50"
+      // Tapping the backdrop (not the sheet itself) closes it.
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCloseRef.current()
+      }}
     >
       {children}
     </div>

@@ -3,9 +3,12 @@ import { normalise } from './lib/normalise'
 import { DEFAULT_CATEGORY } from './lib/categories'
 
 /**
- * A row as stored locally. It is the server's Item plus two client-only fields:
+ * A row as stored locally. It is the server's Item plus client-only fields:
  * - search_name: normalised copy of name, for accent/case-insensitive search
  * - dirty: 1 while the row is a pending local write (the "outbox")
+ * - synced_quantity: the quantity before the first unsent edit, for the
+ *   « 2 → 0 » line on the Synchronisation sheet. Unset when clean or new.
+ *   Never sent; a row coming back from the server drops it.
  * seq is 0 until the server assigns one.
  */
 export interface LocalItem {
@@ -19,6 +22,7 @@ export interface LocalItem {
   updated_by: string
   seq: number
   dirty: 0 | 1
+  synced_quantity?: number
 }
 
 export interface MetaRow {
@@ -51,6 +55,16 @@ export async function getMeta<T>(key: string): Promise<T | undefined> {
 
 export async function setMeta(key: string, value: unknown): Promise<void> {
   await db.meta.put({ key, value })
+}
+
+/**
+ * The quantity to remember as "before" when a row gets a local edit: the
+ * current one if the row was clean, the one already remembered if it was
+ * dirty, none for a brand-new row.
+ */
+function syncedQuantityOf(existing: LocalItem | undefined): number | undefined {
+  if (!existing) return undefined
+  return existing.dirty === 1 ? existing.synced_quantity : existing.quantity
 }
 
 // --- item mutations ---------------------------------------------------------
@@ -121,6 +135,7 @@ export async function saveItem(
       updated_by: updatedBy,
       seq: existing?.seq ?? 0,
       dirty: 1,
+      synced_quantity: syncedQuantityOf(existing),
     })
   })
   return id
@@ -145,6 +160,7 @@ export async function adjustQuantity(
       updated_at: new Date().toISOString(),
       updated_by: updatedBy,
       dirty: 1,
+      synced_quantity: syncedQuantityOf(existing),
     })
   })
 }

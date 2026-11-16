@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Aide</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#BE185D}a:hover{color:#9D174D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FDF2F8; color: #0A0A0A; font-family: Geist, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <div style="position: absolute; inset: 0">
+    <dc-import name="Main" hint-size="390px,844px"></dc-import>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(10, 10, 10, 0.5)"></div>
+  <section role="dialog" aria-modal="true" aria-labelledby="sheet-help-title" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; background: #FFFFFF; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25); padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #E3C7D6"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+      <h1 id="sheet-help-title" style="margin: 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em">Aide</h1>
+      <a href="Main.dc.html" aria-label="Fermer" style="flex: none; width: 44px; height: 44px; border-radius: 999px; background: #FCE7F3; color: #9D174D; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 800">Comment les changements sont envoyés</h2>
+      <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+        <li style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F8EDF3;">
+          <span style="flex: none; width: 28px; height: 28px; border-radius: 999px; background: #BE185D; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">1</span>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 700">Au chalet, sans réseau</span>
+            <span style="font-size: 14px; font-weight: 500; line-height: 1.4; color: #4B5563">Comptez normalement. Tout est gardé sur votre téléphone, même si vous fermez l’application.</span>
+          </div>
+        </li>
+        <li style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F8EDF3;">
+          <span style="flex: none; width: 28px; height: 28px; border-radius: 999px; background: #BE185D; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">2</span>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 700">De retour avec du réseau</span>
+            <span style="font-size: 14px; font-weight: 500; line-height: 1.4; color: #4B5563">Ouvrez l’application. Vos changements partent tout seuls vers les autres téléphones.</span>
+          </div>
+        </li>
+        <li style="display: flex; gap: 12px; padding: 10px 0;">
+          <span style="flex: none; width: 28px; height: 28px; border-radius: 999px; background: #BE185D; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">3</span>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 700">C’est envoyé</span>
+            <span style="font-size: 14px; font-weight: 500; line-height: 1.4; color: #4B5563">L’icône du nuage disparaît des articles et la date « Mis à jour » change.</span>
+          </div>
+        </li>
+      </ol>
+      <p style="margin: 0; font-size: 14px; font-weight: 500; line-height: 1.4; color: #4B5563">Si deux personnes comptent le même article, l’application s’en occupe toute seule.</p>
+    </div>
+    <p style="margin: 0; font-size: 14px; font-weight: 500; line-height: 1.4">Ne supprimez pas l’application avant d’avoir du réseau : les changements pas encore envoyés seraient perdus.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

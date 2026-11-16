@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Modifier un article</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#BE185D}a:hover{color:#9D174D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FDF2F8; color: #0A0A0A; font-family: Geist, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <div style="position: absolute; inset: 0">
+    <dc-import name="Main" hint-size="390px,844px"></dc-import>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(10, 10, 10, 0.5)"></div>
+  <section role="dialog" aria-modal="true" aria-labelledby="sheet-item-title" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; background: #FFFFFF; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25); padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #E3C7D6"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+      <h1 id="sheet-item-title" style="margin: 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em">Modifier l’article</h1>
+      <a href="Main.dc.html" aria-label="Fermer" style="flex: none; width: 44px; height: 44px; border-radius: 999px; background: #FCE7F3; color: #9D174D; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </a>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="sheet-item-name" style="font-size: 15px; font-weight: 700">Nom</label>
+        <input id="sheet-item-name" type="text" value="Café" style="height: 52px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #B0688C; font-family: inherit; font-size: 17px; font-weight: 600; color: #0A0A0A">
+      </div>
+      <fieldset style="margin: 0; padding: 0; border: 0">
+        <legend style="padding: 0; margin-bottom: 6px; font-size: 15px; font-weight: 700">Catégorie</legend>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{categories}}" as="cat" hint-placeholder-count="6">
+            <button type="button" aria-pressed="{{cat.pressed}}" style="height: 44px; padding: 0 4px; border: 0; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 700; {{cat.style}}">{{cat.label}}</button>
+          </sc-for>
+        </div>
+      </fieldset>
+      <div role="group" aria-labelledby="sheet-item-qty-label" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 16px; background: #FCE7F3">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span id="sheet-item-qty-label" style="font-size: 15px; font-weight: 700">Quantité au chalet</span>
+          <span style="font-size: 14px; font-weight: 500; color: #4B5563">paquets</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <button type="button" aria-label="Moins un" style="width: 48px; height: 48px; border: 0; border-radius: 999px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #B0688C; color: #BE185D; display: flex; align-items: center; justify-content: center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+          </button>
+          <span style="min-width: 44px; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -0.02em">0</span>
+          <button type="button" aria-label="Plus un" style="width: 48px; height: 48px; border: 0; border-radius: 999px; background: #BE185D; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="sheet-item-unit" style="font-size: 15px; font-weight: 700">Unité <span style="font-weight: 500; color: #4B5563">(facultatif)</span></label>
+        <input id="sheet-item-unit" type="text" value="paquets" style="height: 52px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #B0688C; font-family: inherit; font-size: 17px; font-weight: 600; color: #0A0A0A">
+      </div>
+    </form>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 2px">
+      <button type="button" style="height: 58px; border: 0; border-radius: 16px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #B0688C; font-family: inherit; font-size: 16px; font-weight: 700; color: #9D174D">Supprimer</button>
+      <a href="Main.dc.html" style="height: 58px; border-radius: 16px; background: #BE185D; color: #FFFFFF; box-shadow: 0 10px 24px rgba(190, 24, 93, 0.4); text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800">Enregistrer</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const on = 'background: #BE185D; color: #FFFFFF';
+    const off = 'background: #FFFFFF; color: #0A0A0A; box-shadow: inset 0 0 0 1px #B0688C';
+    const categories = ['Alimentation', 'Boissons', 'Entretien', 'Hygiène', 'Outils', 'Autres']
+      .map(label => ({ label, style: label === 'Alimentation' ? on : off, pressed: label === 'Alimentation' ? 'true' : 'false' }));
+    return { categories };
+  }
+}
+</script>
+</body>
+</html>
